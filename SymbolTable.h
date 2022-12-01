@@ -5,13 +5,16 @@
 
 
 using namespace std;
+
 class SymbolTable
 {
 private:
     ScopeTable *current;
+    int counter;
 public:
     SymbolTable(ScopeTable *scope) {
     current = scope;
+    counter=1;
 }
 
 ScopeTable* getCurrentScopeTable() const {
@@ -21,7 +24,7 @@ void setCurrentScopeTable(ScopeTable *scope) {
     current = scope;
 }
 
-bool insertSymbol(SymbolInfo *symbol) {
+bool insertSymbol(SymbolInfo* symbol) {
      bool flag=current->insertSym(symbol);
      return flag;
 }
@@ -41,7 +44,10 @@ void printAllScopeTable() {
 }
 
 void exitScope() {
-   // if( current == nullptr ) return;
+    if( current->getID() == 1 ){
+        cout<<"Can't remove the parent scope"<<endl;
+        return;
+    }
     ScopeTable *deleted = current;
     ScopeTable *parScope = current->getParent();
     current=parScope;
@@ -72,15 +78,25 @@ SymbolInfo* lookUpSymbol(string symbol) {
     }
 
 }
-void SymbolTable::enterScope() {
-    if(this->currentScopeTable == nullptr){
-        cout << "Create a new SymbolTable" << endl << endl;
+void enterScope() {
+    if(this->current == nullptr){
+        cout << "Create a new SymbolTable" << endl ;
         return;
     }
-    this->current->setChildScopeCount(current->getChildScopeCount() + 1);
-    string newID = this->current->getID() + "." + to_string(this->current->getChildScopeCount());
-    ScopeTable *newScope = new ScopeTable(this->current->getBucket(), newID);
-    newScope->setParentScope(this->current);
-    this->current = newScope;
+
+    counter=counter+1;
+    ScopeTable *newScope = new ScopeTable(current->getBucket(), counter);
+    newScope->setParent(current);
+    current = newScope;
+}
+
+~SymbolTable(){
+    while(current!=nullptr){
+
+        cout<<"ScopeTable# "<<current->getID()<<" removed"<<endl;
+        ScopeTable* par=current->getParent();
+        delete current;
+        current=par;
+    }
 }
 };

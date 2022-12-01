@@ -3,17 +3,35 @@
 
 using namespace std;
 
+
+unsigned long long int SDBMHash(string str) {
+	unsigned long long int hash = 0;
+	unsigned long long int i = 0;
+    unsigned long long int len = str.length();
+
+	for (i = 0; i < len; i++)
+	{
+		hash = (str[i]) + (hash << 6) + (hash << 16) - hash;
+	}
+
+	return hash;
+
+}
 class ScopeTable{
 
 private:
     int num_buckets;
     SymbolInfo** hashArray;
     ScopeTable* parent;
-    string unique_id;
+    int unique_id;
 public:
-    ScopeTable(int n, string id){
+    ScopeTable(int n, int id){
         num_buckets=n;
-        hashArray=new SymbolInfo*[n]();
+        hashArray=new SymbolInfo*[n];
+         for(int i=0; i<n; i++)
+        {
+            this->hashArray[i] = nullptr;
+        }
         unique_id=id;
         parent=nullptr;
         cout << "ScopeTable#  " << unique_id << " created"<< endl ;
@@ -26,10 +44,10 @@ public:
     void setBucket(int num){
         num_buckets=num;
     }
-    string getID(){
+    int getID(){
         return unique_id;
     }
-    void setID(string id){
+    void setID(int id){
         unique_id=id;
     }
     ScopeTable* getParent() {
@@ -45,32 +63,11 @@ public:
     void setHashArray(SymbolInfo **hashArr) {
         hashArray = hashArr;
     }
-    int ScopeTable::getChildCounter() const {
-    return childCounter;
-}
 
-void ScopeTable::setChildCounter(int childCounter) {
-    ScopeTable::childCounter = childCounter;
-}
-
-
-    long long int int SDBMHash(string str) {
-	unsigned int hash = 0;
-	unsigned int i = 0;
-	unsigned int len = str.length();
-
-	for (i = 0; i < len; i++)
-	{
-		hash = (str[i]) + (hash << 6) + (hash << 16) - hash;
-	}
-
-	return hash%num_buckets;
-
-}
 
     bool insertSym(SymbolInfo *symbol)
     {
-        long long int pos = SDBMHash(symbol->getName());
+        int pos = SDBMHash(symbol->getName())%num_buckets;
         SymbolInfo* symInf=hashArray[pos];
 
         if( symInf != nullptr){
@@ -87,19 +84,20 @@ void ScopeTable::setChildCounter(int childCounter) {
                 }
             current = current->getNext();
             }
+            current = hashArray[pos];
             while(current->getNext()!=nullptr)
             {
                 current = current->getNext();
                 cnt++;
             }
             current->setNext(symbol);
-            cout << "Inserted in ScopeTable# " << unique_id << " at position " << pos << ", " << cnt << endl ;
+            cout << "Inserted in ScopeTable# " << unique_id << " at position " << pos+1 << ", " << cnt+1 << endl ;
             return true;
         }
         else{
             int cnt = 0;
             hashArray[pos] = symbol;
-            cout << "Inserted in ScopeTable# " << unique_id << " at position " << pos << ", " << cnt << endl ;
+            cout << "Inserted in ScopeTable# " << unique_id << " at position " << pos+1 << ", " << cnt+1 << endl ;
             return true;
         }
 }
@@ -108,7 +106,7 @@ bool deleteSym(string symbol) {
       SymbolInfo* lookedUp=lookup(symbol);
       if((lookedUp != nullptr)) {
             //cout << "Found it" << endl;
-            int i = SDBMHash(symbol);
+            int i = SDBMHash(symbol)%num_buckets;
 
             int count = 0;
 
@@ -118,7 +116,7 @@ bool deleteSym(string symbol) {
                  hashArray[i] = current->getNext();
                  delete current;
                  cout << "Deleted " <<"'"<<symbol<<"' " << "from ScopeTable# " <<unique_id << "at position "<<i+1<<", "<<count+1<<endl;
-                       endl ;
+
                  return true;
             }
             else{
@@ -151,14 +149,14 @@ bool deleteSym(string symbol) {
     int flag=0;
 
     int cnt = 0;
-    long long int i = SDBMHash(symbol);
+    long long int i = SDBMHash(symbol)%num_buckets;
 
     SymbolInfo *current = hashArray[i];
     while(current != nullptr)
     {
         if(current->getName() == symbol)
              {
-                 cout <<"'"<<symbol<<"'"<< " Found in ScopeTable# " << unique_id <<  " at position " << i << ", " << cnt << endl ;
+                 cout <<"'"<<symbol<<"'"<< " Found in ScopeTable# " << unique_id <<  " at position " << i+1 << ", " << cnt+1 << endl ;
                  flag=1;
                  return current;
              }

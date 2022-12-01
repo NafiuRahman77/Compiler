@@ -1,6 +1,6 @@
 
 #include <bits/stdc++.h>
-
+#include<sstream>
 
 using namespace std;
 class SymbolInfo{
@@ -128,13 +128,13 @@ public:
                 cnt++;
             }
             current->setNext(symbol);
-            cout << "Inserted in ScopeTable# " << unique_id << " at position " << pos << ", " << cnt << endl ;
+            cout << "Inserted in ScopeTable# " << unique_id << " at position " << pos+1 << ", " << cnt+1 << endl ;
             return true;
         }
         else{
             int cnt = 0;
             hashArray[pos] = symbol;
-            cout << "Inserted in ScopeTable# " << unique_id << " at position " << pos << ", " << cnt << endl ;
+            cout << "Inserted in ScopeTable# " << unique_id << " at position " << pos+1 << ", " << cnt+1 << endl ;
             return true;
         }
 }
@@ -193,7 +193,7 @@ bool deleteSym(string symbol) {
     {
         if(current->getName() == symbol)
              {
-                 cout <<"'"<<symbol<<"'"<< " Found in ScopeTable# " << unique_id <<  " at position " << i << ", " << cnt << endl ;
+                 cout <<"'"<<symbol<<"'"<< " Found in ScopeTable# " << unique_id <<  " at position " << i+1 << ", " << cnt+1 << endl ;
                  flag=1;
                  return current;
              }
@@ -316,50 +316,117 @@ void enterScope() {
     newScope->setParent(current);
     current = newScope;
 }
+
+~SymbolTable(){
+    while(current!=nullptr){
+
+        cout<<"ScopeTable# "<<current->getID()<<" removed"<<endl;
+        ScopeTable* par=current->getParent();
+        delete current;
+        current=par;
+    }
+}
 };
 
 
 int main() {
-    int bucketSize = 10;
-    cin>>bucketSize;
-    ScopeTable *scopeTable = new ScopeTable(bucketSize, 1);
 
-    SymbolTable symbolTable(scopeTable);
-    string command;
-    while(cin>>command){
-        if( command == "I" ){
-            string name,type;
-            cin>>name>>type;
-            cout<<command<<" "<<name<<" "<<type<<endl<<endl;
+ifstream file;
+file.open("in.txt");
+if(!file.is_open())
+{
+cout<<"Unable to open the file."<<endl;
+return 0;
+}
+
+ofstream out("out.txt");
+streambuf *coutbuf = cout.rdbuf();
+cout.rdbuf(out.rdbuf());
+
+
+string line, command, word2, word3, word4;
+istringstream iss;
+getline(file, line);
+int bucketSize = stoi(line);
+ScopeTable *scopeTable = new ScopeTable(bucketSize, 1);
+SymbolTable symbolTable(scopeTable);
+
+while(getline(file, line))
+{
+    iss.clear();
+    iss.str(line);;
+    iss>>command;
+     if( command == "I" ){
+            string name,type, extra;
+            iss>>name>>type>>extra;
+            if(name.empty() || type.empty() || !(extra.empty())){
+                cout<<"Number of parameters mismatch for the command I"<<endl;
+            }
+            else{
+            cout<<command<<" "<<name<<" "<<type<<endl;
             SymbolInfo* symbolInfo=new SymbolInfo(name,type);
             symbolTable.insertSymbol(symbolInfo);
+            }
         }else if( command == "L" ){
-            string name;
-            cin>>name;
-            cout<<command<<" "<<name<<endl<<endl;
+            string name,extra;
+            iss>>name>>extra;
+            if(name.empty() || !(extra.empty())){
+                cout<<"Number of parameters mismatch for the command L"<<endl;
+            }else{
+            cout<<command<<" "<<name<<endl;
             symbolTable.lookUpSymbol(name);
+            }
         }else if( command == "D" ){
-            string name;
-            cin>>name;
-            cout<<command<<" "<<name<<endl<<endl;
+            string name,extra;
+            iss>>name>>extra;
+            if(name.empty() || !(extra.empty())){
+                cout<<"Number of parameters mismatch for the command D"<<endl;
+            }else{
+            cout<<command<<" "<<name<<endl;
             symbolTable.removeSymbol(name);
+            }
         }else if( command == "P" ){
-            string code;
-            cin>>code;
-            cout<<command<<" "<<code<<endl<<endl;
-            if( code == "A" )
+            string name,extra;
+            iss>>name>>extra;
+            if(name.empty() || !(extra.empty())){
+                cout<<"Number of parameters mismatch for the command P"<<endl;
+            }
+            else{
+            cout<<command<<" "<<name<<endl;
+            if( name == "A" )
                 symbolTable.printAllScopeTable();
             else
                 symbolTable.printCurrentScopeTable();
+            }
         }else if( command == "S" ){
-            cout<<command<<endl<<endl;
+            string extra;
+            iss>>extra;
+            if( !(extra.empty())){
+                cout<<"Number of parameters mismatch for the command S"<<endl;
+            }
+
+            else{
+            cout<<command<<endl;
             symbolTable.enterScope();
+            }
         }else if( command == "E" ){
-            cout<<command<<endl<<endl;
+            string extra;
+            iss>>extra;
+            if( !(extra.empty())){
+                cout<<"Number of parameters mismatch for the command E"<<endl;
+            }
+            else{
+
+            cout<<command<<endl;
             symbolTable.exitScope();
+            }
         }else if( command == "Q" ){
             return 0;
         }
-    }
-    return 0;
+
+
+}
+
+file.close();
+return 0;
 }
