@@ -174,9 +174,10 @@ bool deleteSym(string symbol) {
 
             SymbolInfo *current = hashArray[i];
 
+
             if(current->getName()==symbol){
                  hashArray[i] = current->getNext();
-                 delete current;
+                 //delete current;
                  cout << "\tDeleted " <<"'"<<symbol<<"' " << "from ScopeTable# " <<unique_id << " at position "<<i+1<<", "<<count+1<<endl;
 
                  return true;
@@ -305,7 +306,7 @@ void exitScope() {
     ScopeTable *deleted = current;
     ScopeTable *parScope = current->getParent();
     current=parScope;
-    cout<<"\tScopeTable with id "<<deleted->getID()<<" removed"<<endl;
+    cout<<"\tScopeTable# "<<deleted->getID()<<" removed"<<endl;
     delete deleted;
 
 }
@@ -388,7 +389,12 @@ while(getline(file, line))
             string name,type, extra;
             iss>>name>>type>>extra;
             if(name.empty() || type.empty() || !(extra.empty())){
-                cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<type<<" "<<extra<<endl;
+                cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<type<<" "<<extra;
+                while(iss.good()){
+                    iss>>extra;
+                    cout<<" "<<extra;
+                }
+                cout<<endl;
                  cout<<"\tNumber of parameters mismatch for the command I"<<endl;
             }
             else{
@@ -400,7 +406,12 @@ while(getline(file, line))
             string name,extra;
             iss>>name>>extra;
             if(name.empty() || !(extra.empty())){
-                 cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<extra<<endl;
+                 cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<extra;
+                 while(iss.good()){
+                    iss>>extra;
+                    cout<<" "<<extra;
+                }
+                cout<<endl;
                  cout<<"\tNumber of parameters mismatch for the command L"<<endl;
             }else{
             cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<endl;
@@ -410,8 +421,13 @@ while(getline(file, line))
             string name,extra;
             iss>>name>>extra;
             if(name.empty() || !(extra.empty())){
-                 cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<extra<<endl;
-                 cout<<"\tNumber of parameters mismatch for the command L"<<endl;
+                 cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<extra;
+                 while(iss.good()){
+                    iss>>extra;
+                    cout<<" "<<extra;
+                }
+                cout<<endl;
+                cout<<"\tNumber of parameters mismatch for the command L"<<endl;
             }else{
             cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<endl;
             symbolTable.removeSymbol(name);
@@ -420,7 +436,12 @@ while(getline(file, line))
             string name,extra;
             iss>>name>>extra;
             if(name.empty() || !(extra.empty())){
-                 cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<extra<<endl;
+                 cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<extra;
+                 while(iss.good()){
+                    iss>>extra;
+                    cout<<" "<<extra;
+                }
+                cout<<endl;
                  cout<<"\tNumber of parameters mismatch for the command P"<<endl;
             }
             else{
@@ -434,7 +455,12 @@ while(getline(file, line))
             string extra;
             iss>>extra;
             if( !(extra.empty())){
-                cout<<"Cmd "<<commandCount<<": "<<command<<" "<<extra<<endl;
+                cout<<"Cmd "<<commandCount<<": "<<command<<" "<<extra;
+                while(iss.good()){
+                    iss>>extra;
+                    cout<<" "<<extra;
+                }
+                cout<<endl;
                  cout<<"\tNumber of parameters mismatch for the command S"<<endl;
             }
 
@@ -446,7 +472,12 @@ while(getline(file, line))
             string extra;
             iss>>extra;
             if( !(extra.empty())){
-                 cout<<"Cmd "<<commandCount<<": "<<command<<" "<<extra<<endl;
+                 cout<<"Cmd "<<commandCount<<": "<<command<<" "<<extra;
+                 while(iss.good()){
+                    iss>>extra;
+                    cout<<" "<<extra;
+                }
+                cout<<endl;
                  cout<<"\tNumber of parameters mismatch for the command E"<<endl;
             }
             else{
