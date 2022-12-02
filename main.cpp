@@ -41,7 +41,7 @@ public:
 
 
 };
-unsigned long long int SDBMHash(string str) {
+unsigned long long int SDBMHash(string str, int n) {
 	unsigned long long int hash = 0;
 	unsigned long long int i = 0;
     unsigned long long int len = str.length();
@@ -49,6 +49,7 @@ unsigned long long int SDBMHash(string str) {
 	for (i = 0; i < len; i++)
 	{
 		hash = (str[i]) + (hash << 6) + (hash << 16) - hash;
+		hash%=n;
 	}
 
 	return hash;
@@ -104,7 +105,7 @@ public:
 
     bool insertSym(SymbolInfo *symbol)
     {
-        int pos = SDBMHash(symbol->getName())%num_buckets;
+        int pos = SDBMHash(symbol->getName(),num_buckets)%num_buckets;
         SymbolInfo* symInf=hashArray[pos];
 
         if( symInf != nullptr){
@@ -142,7 +143,7 @@ public:
 bool deleteSym(string symbol) {
     int flag=0;
     int cnt = 0;
-    long long int i = SDBMHash(symbol)%num_buckets;
+    long long int i = SDBMHash(symbol,num_buckets)%num_buckets;
 
     SymbolInfo *current = hashArray[i];
     SymbolInfo* lookedUp;
@@ -168,7 +169,7 @@ bool deleteSym(string symbol) {
 
       if((lookedUp != nullptr)) {
 
-            int i = SDBMHash(symbol)%num_buckets;
+            int i = SDBMHash(symbol,num_buckets)%num_buckets;
 
             int count = 0;
 
@@ -211,7 +212,7 @@ bool deleteSym(string symbol) {
   {
     int flag=0;
     int cnt = 0;
-    long long int i = SDBMHash(symbol)%num_buckets;
+    long long int i = SDBMHash(symbol,num_buckets)%num_buckets;
 
     SymbolInfo *current = hashArray[i];
     while(current != nullptr)
@@ -300,7 +301,7 @@ void printAllScopeTable() {
 
 void exitScope() {
     if( current->getID() == 1 ){
-        cout<<"\tScopeTable#1 cannot be removed"<<endl;
+        cout<<"\tScopeTable# 1 cannot be removed"<<endl;
         return;
     }
     ScopeTable *deleted = current;
@@ -389,13 +390,21 @@ while(getline(file, line))
             string name,type, extra;
             iss>>name>>type>>extra;
             if(name.empty() || type.empty() || !(extra.empty())){
+                if(name.empty()){
+                  cout<<"Cmd "<<commandCount<<": "<<command<<endl;
+                }
+                else if(type.empty()){
+                    cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<endl;
+                }
+                else{
                 cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<type<<" "<<extra;
                 while(iss.good()){
                     iss>>extra;
                     cout<<" "<<extra;
                 }
                 cout<<endl;
-                 cout<<"\tNumber of parameters mismatch for the command I"<<endl;
+                }
+                cout<<"\tNumber of parameters mismatch for the command I"<<endl;
             }
             else{
             cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<type<<endl;
@@ -406,12 +415,18 @@ while(getline(file, line))
             string name,extra;
             iss>>name>>extra;
             if(name.empty() || !(extra.empty())){
+                if(name.empty()){
+                  cout<<"Cmd "<<commandCount<<": "<<command<<endl;
+                }
+                else {
+
                  cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<extra;
                  while(iss.good()){
                     iss>>extra;
                     cout<<" "<<extra;
                 }
                 cout<<endl;
+                }
                  cout<<"\tNumber of parameters mismatch for the command L"<<endl;
             }else{
             cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<endl;
@@ -421,13 +436,19 @@ while(getline(file, line))
             string name,extra;
             iss>>name>>extra;
             if(name.empty() || !(extra.empty())){
+                 if(name.empty()){
+                  cout<<"Cmd "<<commandCount<<": "<<command<<endl;
+                }
+                else {
+
                  cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<extra;
                  while(iss.good()){
                     iss>>extra;
                     cout<<" "<<extra;
                 }
                 cout<<endl;
-                cout<<"\tNumber of parameters mismatch for the command L"<<endl;
+                }
+                cout<<"\tNumber of parameters mismatch for the  command D"<<endl;
             }else{
             cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<endl;
             symbolTable.removeSymbol(name);
@@ -436,12 +457,18 @@ while(getline(file, line))
             string name,extra;
             iss>>name>>extra;
             if(name.empty() || !(extra.empty())){
+                 if(name.empty()){
+                  cout<<"Cmd "<<commandCount<<": "<<command<<endl;
+                }
+                else {
+
                  cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<extra;
                  while(iss.good()){
                     iss>>extra;
                     cout<<" "<<extra;
                 }
                 cout<<endl;
+                }
                  cout<<"\tNumber of parameters mismatch for the command P"<<endl;
             }
             else{
@@ -461,7 +488,7 @@ while(getline(file, line))
                     cout<<" "<<extra;
                 }
                 cout<<endl;
-                 cout<<"\tNumber of parameters mismatch for the command S"<<endl;
+                cout<<"\tNumber of parameters mismatch for the command S"<<endl;
             }
 
             else{
@@ -478,7 +505,7 @@ while(getline(file, line))
                     cout<<" "<<extra;
                 }
                 cout<<endl;
-                 cout<<"\tNumber of parameters mismatch for the command E"<<endl;
+                cout<<"\tNumber of parameters mismatch for the command E"<<endl;
             }
             else{
 
