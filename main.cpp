@@ -71,7 +71,7 @@ public:
         }
         unique_id=id;
         parent=nullptr;
-        cout << "ScopeTable#  " << unique_id << " created"<< endl ;
+        cout << "\tScopeTable# " << unique_id << " created"<< endl ;
 
     }
 
@@ -116,7 +116,7 @@ public:
                 if(current->getName() == symbol->getName())
                 {
                     //cout << "This word already exists" << endl;
-                    cout << "'" << current->getName() << "' "  << "already exists in the current ScopeTable" << endl ;
+                    cout << "\t'" << current->getName() << "' "  << "already exists in the current ScopeTable" << endl ;
                     return false;
                 }
             current = current->getNext();
@@ -128,21 +128,46 @@ public:
                 cnt++;
             }
             current->setNext(symbol);
-            cout << "Inserted in ScopeTable# " << unique_id << " at position " << pos+1 << ", " << cnt+1 << endl ;
+            cout << "\tInserted in ScopeTable# " << unique_id << " at position " << pos+1 << ", " << cnt+1 << endl ;
             return true;
         }
         else{
             int cnt = 0;
             hashArray[pos] = symbol;
-            cout << "Inserted in ScopeTable# " << unique_id << " at position " << pos+1 << ", " << cnt+1 << endl ;
+            cout << "\tInserted in ScopeTable# " << unique_id << " at position " << pos+1 << ", " << cnt+1 << endl ;
             return true;
         }
 }
 
 bool deleteSym(string symbol) {
-      SymbolInfo* lookedUp=lookup(symbol);
+    int flag=0;
+    int cnt = 0;
+    long long int i = SDBMHash(symbol)%num_buckets;
+
+    SymbolInfo *current = hashArray[i];
+    SymbolInfo* lookedUp;
+    while(current != nullptr)
+    {
+        if(current->getName() == symbol)
+             {
+                 flag=1;
+                 break;
+             }
+        cnt++;
+        current = current->getNext();
+
+     }
+
+     if(!flag){
+       lookedUp= nullptr;
+     }
+     else{
+
+        lookedUp= current;
+     }
+
       if((lookedUp != nullptr)) {
-            //cout << "Found it" << endl;
+
             int i = SDBMHash(symbol)%num_buckets;
 
             int count = 0;
@@ -152,7 +177,7 @@ bool deleteSym(string symbol) {
             if(current->getName()==symbol){
                  hashArray[i] = current->getNext();
                  delete current;
-                 cout << "Deleted " <<"'"<<symbol<<"' " << "from ScopeTable# " <<unique_id << "at position "<<i+1<<", "<<count+1<<endl;
+                 cout << "\tDeleted " <<"'"<<symbol<<"' " << "from ScopeTable# " <<unique_id << " at position "<<i+1<<", "<<count+1<<endl;
 
                  return true;
             }
@@ -162,7 +187,7 @@ bool deleteSym(string symbol) {
                  while (current != nullptr) {
                      if (current->getName() == symbol) {
                          prev->setNext(current->getNext());
-                         cout << "Deleted " <<"'"<<symbol<<"' " << "from ScopeTable# " <<unique_id << "at position "<<i+1<<", "<<count+1<<endl;
+                         cout << "\tDeleted " <<"'"<<symbol<<"' " << "from ScopeTable# " <<unique_id << " at position "<<i+1<<", "<<count+1<<endl;
                          delete current;
                          return true;
                      }
@@ -176,7 +201,7 @@ bool deleteSym(string symbol) {
      return true;
      }
      else  {
-         cout << "Not found in the current ScopeTable" << endl;
+         cout << "\tNot found in the current ScopeTable" << endl;
          return false;
      }
  }
@@ -184,7 +209,6 @@ bool deleteSym(string symbol) {
     SymbolInfo* lookup(string symbol)
   {
     int flag=0;
-
     int cnt = 0;
     long long int i = SDBMHash(symbol)%num_buckets;
 
@@ -193,9 +217,8 @@ bool deleteSym(string symbol) {
     {
         if(current->getName() == symbol)
              {
-                 cout <<"'"<<symbol<<"'"<< " Found in ScopeTable# " << unique_id <<  " at position " << i+1 << ", " << cnt+1 << endl ;
                  flag=1;
-                 return current;
+                 break;
              }
         cnt++;
         current = current->getNext();
@@ -205,21 +228,25 @@ bool deleteSym(string symbol) {
      if(!flag){
        return nullptr;
      }
+     else{
+        cout <<"\t'"<<symbol<<"'"<< " found in ScopeTable# " << unique_id <<  " at position " << i+1 << ", " << cnt+1 << endl ;
+        return current;
+     }
    }
 
    void printScope() {
 
-    cout << "ScopeTable# " << unique_id << endl;
+    cout << "\tScopeTable# " << unique_id << endl;
     for(int i=0; i<num_buckets; i++){
         SymbolInfo *current = hashArray[i];
-        cout << i+1 << " --> ";
+        cout <<"\t"<< i+1 << "--> ";
         while(current!= nullptr){
-            cout << "< " << current->getName() << " : " << current->getType() << " > ";
+            cout << "<" << current->getName() << "," << current->getType() << "> ";
             current = current->getNext();
         }
         cout << endl;
     }
-    cout << endl;
+  //  cout << endl;
 }
  ~ScopeTable(){
 
@@ -272,20 +299,20 @@ void printAllScopeTable() {
 
 void exitScope() {
     if( current->getID() == 1 ){
-        cout<<"Can't remove the parent scope"<<endl;
+        cout<<"\tScopeTable#1 cannot be removed"<<endl;
         return;
     }
     ScopeTable *deleted = current;
     ScopeTable *parScope = current->getParent();
     current=parScope;
-    cout<<"ScopeTable with id "<<deleted->getID()<<" removed"<<endl;
+    cout<<"\tScopeTable with id "<<deleted->getID()<<" removed"<<endl;
     delete deleted;
 
 }
 SymbolInfo* lookUpSymbol(string symbol) {
 
     ScopeTable *curr = current;
-    SymbolInfo *s =  curr->lookup(symbol);
+    SymbolInfo* s;
     int flag=0;
 
     while (curr!= nullptr){
@@ -300,14 +327,14 @@ SymbolInfo* lookUpSymbol(string symbol) {
         return s;
     }
     else{
-    cout<<"Not found in any of the ScopeTables "<<endl;
+    cout<<"\t'"<<symbol<<"'"<< " not found in any of the ScopeTables"<<endl;
     return nullptr;
     }
 
 }
 void enterScope() {
     if(this->current == nullptr){
-        cout << "Create a new SymbolTable" << endl ;
+        cout << "\tCreate a new SymbolTable" << endl ;
         return;
     }
 
@@ -320,7 +347,7 @@ void enterScope() {
 ~SymbolTable(){
     while(current!=nullptr){
 
-        cout<<"ScopeTable# "<<current->getID()<<" removed"<<endl;
+        cout<<"\tScopeTable# "<<current->getID()<<" removed"<<endl;
         ScopeTable* par=current->getParent();
         delete current;
         current=par;
@@ -350,6 +377,7 @@ getline(file, line);
 int bucketSize = stoi(line);
 ScopeTable *scopeTable = new ScopeTable(bucketSize, 1);
 SymbolTable symbolTable(scopeTable);
+int commandCount=1;
 
 while(getline(file, line))
 {
@@ -360,10 +388,11 @@ while(getline(file, line))
             string name,type, extra;
             iss>>name>>type>>extra;
             if(name.empty() || type.empty() || !(extra.empty())){
-                cout<<"Number of parameters mismatch for the command I"<<endl;
+                cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<type<<" "<<extra<<endl;
+                 cout<<"\tNumber of parameters mismatch for the command I"<<endl;
             }
             else{
-            cout<<command<<" "<<name<<" "<<type<<endl;
+            cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<type<<endl;
             SymbolInfo* symbolInfo=new SymbolInfo(name,type);
             symbolTable.insertSymbol(symbolInfo);
             }
@@ -371,28 +400,31 @@ while(getline(file, line))
             string name,extra;
             iss>>name>>extra;
             if(name.empty() || !(extra.empty())){
-                cout<<"Number of parameters mismatch for the command L"<<endl;
+                 cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<extra<<endl;
+                 cout<<"\tNumber of parameters mismatch for the command L"<<endl;
             }else{
-            cout<<command<<" "<<name<<endl;
+            cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<endl;
             symbolTable.lookUpSymbol(name);
             }
         }else if( command == "D" ){
             string name,extra;
             iss>>name>>extra;
             if(name.empty() || !(extra.empty())){
-                cout<<"Number of parameters mismatch for the command D"<<endl;
+                 cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<extra<<endl;
+                 cout<<"\tNumber of parameters mismatch for the command L"<<endl;
             }else{
-            cout<<command<<" "<<name<<endl;
+            cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<endl;
             symbolTable.removeSymbol(name);
             }
         }else if( command == "P" ){
             string name,extra;
             iss>>name>>extra;
             if(name.empty() || !(extra.empty())){
-                cout<<"Number of parameters mismatch for the command P"<<endl;
+                 cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<" "<<extra<<endl;
+                 cout<<"\tNumber of parameters mismatch for the command P"<<endl;
             }
             else{
-            cout<<command<<" "<<name<<endl;
+            cout<<"Cmd "<<commandCount<<": "<<command<<" "<<name<<endl;
             if( name == "A" )
                 symbolTable.printAllScopeTable();
             else
@@ -402,27 +434,31 @@ while(getline(file, line))
             string extra;
             iss>>extra;
             if( !(extra.empty())){
-                cout<<"Number of parameters mismatch for the command S"<<endl;
+                cout<<"Cmd "<<commandCount<<": "<<command<<" "<<extra<<endl;
+                 cout<<"\tNumber of parameters mismatch for the command S"<<endl;
             }
 
             else{
-            cout<<command<<endl;
+            cout<<"Cmd "<<commandCount<<": "<<command<<endl;
             symbolTable.enterScope();
             }
         }else if( command == "E" ){
             string extra;
             iss>>extra;
             if( !(extra.empty())){
-                cout<<"Number of parameters mismatch for the command E"<<endl;
+                 cout<<"Cmd "<<commandCount<<": "<<command<<" "<<extra<<endl;
+                 cout<<"\tNumber of parameters mismatch for the command E"<<endl;
             }
             else{
 
-            cout<<command<<endl;
+            cout<<"Cmd "<<commandCount<<": "<<command<<endl;
             symbolTable.exitScope();
             }
         }else if( command == "Q" ){
+            cout<<"Cmd "<<commandCount<<": "<<command<<endl;
             return 0;
         }
+        commandCount++;
 
 
 }
