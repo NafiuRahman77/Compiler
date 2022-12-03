@@ -8,7 +8,7 @@ Cmd 3: L i
 Cmd 4: L i j
 	Number of parameters mismatch for the command L
 Cmd 5: L j
-	'j' not found in any of the ScopeTables 
+	'j' not found in any of the ScopeTables
 Cmd 6: I 23 NUMBER
 	Inserted in ScopeTable# 1 at position 5, 1
 Cmd 7: P C
@@ -75,8 +75,8 @@ Cmd 19: D ==
 	Deleted '==' from ScopeTable# 2 at position 2, 1
 Cmd 20: D 23
 	Not found in the current ScopeTable
-Cmd 21: D  
-	Number of parameters mismatch for the command L
+Cmd 21: D
+	Number of parameters mismatch for the  command D
 Cmd 22: P A
 	ScopeTable# 2
 	1--> 
@@ -130,14 +130,14 @@ Cmd 27: P A
 Cmd 28: L foo
 	'foo' found in ScopeTable# 2 at position 7, 2
 Cmd 29: E
-	ScopeTable with id 3 removed
+	ScopeTable# 3 removed
 Cmd 30: I num VAR
 	Inserted in ScopeTable# 2 at position 7, 3
 Cmd 31: S
 	ScopeTable# 4 created
 Cmd 32: I true BOOL
 	Inserted in ScopeTable# 4 at position 5, 1
-Cmd 33: I a  
+Cmd 33: I a
 	Number of parameters mismatch for the command I
 Cmd 34: P A
 	ScopeTable# 4
@@ -165,11 +165,11 @@ Cmd 34: P A
 	6--> 
 	7--> <foo,FUNCTION> 
 Cmd 35: E
-	ScopeTable with id 4 removed
+	ScopeTable# 4 removed
 Cmd 36: E
-	ScopeTable with id 2 removed
+	ScopeTable# 2 removed
 Cmd 37: E
-	ScopeTable#1 cannot be removed
+	ScopeTable# 1 cannot be removed
 Cmd 38: S
 	ScopeTable# 5 created
 Cmd 39: P A

@@ -64,11 +64,8 @@ private:
 public:
     ScopeTable(int n, int id){
         num_buckets=n;
-        hashArray=new SymbolInfo*[n];
-         for(int i=0; i<n; i++)
-        {
-            this->hashArray[i] = nullptr;
-        }
+        hashArray=new SymbolInfo*[n]();
+
         unique_id=id;
         parent=nullptr;
         cout << "\tScopeTable# " << unique_id << " created"<< endl ;
@@ -115,7 +112,7 @@ public:
             {
                 if(current->getName() == symbol->getName())
                 {
-                    //cout << "This word already exists" << endl;
+
                     cout << "\t'" << current->getName() << "' "  << "already exists in the current ScopeTable" << endl ;
                     return false;
                 }
@@ -177,7 +174,6 @@ bool deleteSym(string symbol) {
 
             if(current->getName()==symbol){
                  hashArray[i] = current->getNext();
-                 //delete current;
                  cout << "\tDeleted " <<"'"<<symbol<<"' " << "from ScopeTable# " <<unique_id << " at position "<<i+1<<", "<<count+1<<endl;
 
                  return true;
@@ -247,11 +243,11 @@ bool deleteSym(string symbol) {
         }
         cout << endl;
     }
-  //  cout << endl;
+
 }
  ~ScopeTable(){
 
-   // delete parent;
+
     for (int i=0; i<num_buckets; i++){
         delete hashArray[i];
     }

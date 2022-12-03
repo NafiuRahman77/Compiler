@@ -4,7 +4,7 @@
 using namespace std;
 
 
-unsigned long long int SDBMHash(string str) {
+unsigned long long int SDBMHash(string str, int n) {
 	unsigned long long int hash = 0;
 	unsigned long long int i = 0;
     unsigned long long int len = str.length();
@@ -12,6 +12,7 @@ unsigned long long int SDBMHash(string str) {
 	for (i = 0; i < len; i++)
 	{
 		hash = (str[i]) + (hash << 6) + (hash << 16) - hash;
+		hash%=n;
 	}
 
 	return hash;
@@ -34,7 +35,7 @@ public:
         }
         unique_id=id;
         parent=nullptr;
-        cout << "ScopeTable#  " << unique_id << " created"<< endl ;
+        cout << "\tScopeTable# " << unique_id << " created"<< endl ;
 
     }
 
@@ -67,7 +68,7 @@ public:
 
     bool insertSym(SymbolInfo *symbol)
     {
-        int pos = SDBMHash(symbol->getName())%num_buckets;
+        int pos = SDBMHash(symbol->getName(),num_buckets)%num_buckets;
         SymbolInfo* symInf=hashArray[pos];
 
         if( symInf != nullptr){
@@ -78,8 +79,8 @@ public:
             {
                 if(current->getName() == symbol->getName())
                 {
-                    //cout << "This word already exists" << endl;
-                    cout << "'" << current->getName() << "' "  << "already exists in the current ScopeTable" << endl ;
+
+                    cout << "\t'" << current->getName() << "' "  << "already exists in the current ScopeTable" << endl ;
                     return false;
                 }
             current = current->getNext();
@@ -91,31 +92,56 @@ public:
                 cnt++;
             }
             current->setNext(symbol);
-            cout << "Inserted in ScopeTable# " << unique_id << " at position " << pos+1 << ", " << cnt+1 << endl ;
+            cout << "\tInserted in ScopeTable# " << unique_id << " at position " << pos+1 << ", " << cnt+1 << endl ;
             return true;
         }
         else{
             int cnt = 0;
             hashArray[pos] = symbol;
-            cout << "Inserted in ScopeTable# " << unique_id << " at position " << pos+1 << ", " << cnt+1 << endl ;
+            cout << "\tInserted in ScopeTable# " << unique_id << " at position " << pos+1 << ", " << cnt+1 << endl ;
             return true;
         }
 }
 
 bool deleteSym(string symbol) {
-      SymbolInfo* lookedUp=lookup(symbol);
+    int flag=0;
+    int cnt = 0;
+    long long int i = SDBMHash(symbol,num_buckets)%num_buckets;
+
+    SymbolInfo *current = hashArray[i];
+    SymbolInfo* lookedUp;
+    while(current != nullptr)
+    {
+        if(current->getName() == symbol)
+             {
+                 flag=1;
+                 break;
+             }
+        cnt++;
+        current = current->getNext();
+
+     }
+
+     if(!flag){
+       lookedUp= nullptr;
+     }
+     else{
+
+        lookedUp= current;
+     }
+
       if((lookedUp != nullptr)) {
-            //cout << "Found it" << endl;
-            int i = SDBMHash(symbol)%num_buckets;
+
+            int i = SDBMHash(symbol,num_buckets)%num_buckets;
 
             int count = 0;
 
             SymbolInfo *current = hashArray[i];
 
+
             if(current->getName()==symbol){
                  hashArray[i] = current->getNext();
-                 delete current;
-                 cout << "Deleted " <<"'"<<symbol<<"' " << "from ScopeTable# " <<unique_id << "at position "<<i+1<<", "<<count+1<<endl;
+                 cout << "\tDeleted " <<"'"<<symbol<<"' " << "from ScopeTable# " <<unique_id << " at position "<<i+1<<", "<<count+1<<endl;
 
                  return true;
             }
@@ -125,7 +151,7 @@ bool deleteSym(string symbol) {
                  while (current != nullptr) {
                      if (current->getName() == symbol) {
                          prev->setNext(current->getNext());
-                         cout << "Deleted " <<"'"<<symbol<<"' " << "from ScopeTable# " <<unique_id << "at position "<<i+1<<", "<<count+1<<endl;
+                         cout << "\tDeleted " <<"'"<<symbol<<"' " << "from ScopeTable# " <<unique_id << " at position "<<i+1<<", "<<count+1<<endl;
                          delete current;
                          return true;
                      }
@@ -136,10 +162,10 @@ bool deleteSym(string symbol) {
                  }
              }
 
-     return true;
+     
      }
      else  {
-         cout << "Not found in the current ScopeTable" << endl;
+         cout << "\tNot found in the current ScopeTable" << endl;
          return false;
      }
  }
@@ -147,18 +173,16 @@ bool deleteSym(string symbol) {
     SymbolInfo* lookup(string symbol)
   {
     int flag=0;
-
     int cnt = 0;
-    long long int i = SDBMHash(symbol)%num_buckets;
+    long long int i = SDBMHash(symbol,num_buckets)%num_buckets;
 
     SymbolInfo *current = hashArray[i];
     while(current != nullptr)
     {
         if(current->getName() == symbol)
              {
-                 cout <<"'"<<symbol<<"'"<< " Found in ScopeTable# " << unique_id <<  " at position " << i+1 << ", " << cnt+1 << endl ;
                  flag=1;
-                 return current;
+                 break;
              }
         cnt++;
         current = current->getNext();
@@ -168,25 +192,29 @@ bool deleteSym(string symbol) {
      if(!flag){
        return nullptr;
      }
+     else{
+        cout <<"\t'"<<symbol<<"'"<< " found in ScopeTable# " << unique_id <<  " at position " << i+1 << ", " << cnt+1 << endl ;
+        return current;
+     }
    }
 
    void printScope() {
 
-    cout << "ScopeTable# " << unique_id << endl;
+    cout << "\tScopeTable# " << unique_id << endl;
     for(int i=0; i<num_buckets; i++){
         SymbolInfo *current = hashArray[i];
-        cout << i+1 << " --> ";
+        cout <<"\t"<< i+1 << "--> ";
         while(current!= nullptr){
-            cout << "< " << current->getName() << " : " << current->getType() << " > ";
+            cout << "<" << current->getName() << "," << current->getType() << "> ";
             current = current->getNext();
         }
         cout << endl;
     }
-    cout << endl;
+
 }
  ~ScopeTable(){
 
-   // delete parent;
+
     for (int i=0; i<num_buckets; i++){
         delete hashArray[i];
     }

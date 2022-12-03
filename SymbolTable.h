@@ -5,7 +5,6 @@
 
 
 using namespace std;
-
 class SymbolTable
 {
 private:
@@ -45,20 +44,20 @@ void printAllScopeTable() {
 
 void exitScope() {
     if( current->getID() == 1 ){
-        cout<<"Can't remove the parent scope"<<endl;
+        cout<<"\tScopeTable# 1 cannot be removed"<<endl;
         return;
     }
     ScopeTable *deleted = current;
     ScopeTable *parScope = current->getParent();
     current=parScope;
-    cout<<"ScopeTable with id "<<deleted->getID()<<" removed"<<endl;
+    cout<<"\tScopeTable# "<<deleted->getID()<<" removed"<<endl;
     delete deleted;
 
 }
 SymbolInfo* lookUpSymbol(string symbol) {
 
     ScopeTable *curr = current;
-    SymbolInfo *s =  curr->lookup(symbol);
+    SymbolInfo* s;
     int flag=0;
 
     while (curr!= nullptr){
@@ -73,14 +72,14 @@ SymbolInfo* lookUpSymbol(string symbol) {
         return s;
     }
     else{
-    cout<<"Not found in any of the ScopeTables "<<endl;
+    cout<<"\t'"<<symbol<<"'"<< " not found in any of the ScopeTables"<<endl;
     return nullptr;
     }
 
 }
 void enterScope() {
     if(this->current == nullptr){
-        cout << "Create a new SymbolTable" << endl ;
+        cout << "\tCreate a new SymbolTable" << endl ;
         return;
     }
 
@@ -93,7 +92,7 @@ void enterScope() {
 ~SymbolTable(){
     while(current!=nullptr){
 
-        cout<<"ScopeTable# "<<current->getID()<<" removed"<<endl;
+        cout<<"\tScopeTable# "<<current->getID()<<" removed"<<endl;
         ScopeTable* par=current->getParent();
         delete current;
         current=par;
