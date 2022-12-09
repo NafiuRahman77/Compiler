@@ -1,0 +1,116 @@
+	ScopeTable# 1 created
+Cmd 1: I a a
+	Inserted in ScopeTable# 1 at position 7, 1
+Cmd 2: I f f
+	Inserted in ScopeTable# 1 at position 5, 1
+Cmd 3: I h h
+	Inserted in ScopeTable# 1 at position 7, 2
+Cmd 4: I k k
+	Inserted in ScopeTable# 1 at position 3, 1
+Cmd 5: I l l
+	Inserted in ScopeTable# 1 at position 4, 1
+Cmd 6: I g g
+	Inserted in ScopeTable# 1 at position 6, 1
+Cmd 7: I c c
+	Inserted in ScopeTable# 1 at position 2, 1
+Cmd 8: P C
+	ScopeTable# 1
+	1--> 
+	2--> <c,c> 
+	3--> <k,k> 
+	4--> <l,l> 
+	5--> <f,f> 
+	6--> <g,g> 
+	7--> <a,a> <h,h> 
+Cmd 9: I e e
+	Inserted in ScopeTable# 1 at position 4, 2
+Cmd 10: I b b
+	Inserted in ScopeTable# 1 at position 1, 1
+Cmd 11: I i i
+	Inserted in ScopeTable# 1 at position 1, 2
+Cmd 12: I f c
+	'f' already exists in the current ScopeTable
+Cmd 13: I d d
+	Inserted in ScopeTable# 1 at position 3, 2
+Cmd 14: I j j
+	Inserted in ScopeTable# 1 at position 2, 2
+Cmd 15: I o o
+	Inserted in ScopeTable# 1 at position 7, 3
+Cmd 16: I v v
+	Inserted in ScopeTable# 1 at position 7, 4
+Cmd 17: P A
+	ScopeTable# 1
+	1--> <b,b> <i,i> 
+	2--> <c,c> <j,j> 
+	3--> <k,k> <d,d> 
+	4--> <l,l> <e,e> 
+	5--> <f,f> 
+	6--> <g,g> 
+	7--> <a,a> <h,h> <o,o> <v,v> 
+Cmd 18: D v
+	Deleted 'v' from ScopeTable# 1 at position 7, 4
+Cmd 19: P A
+	ScopeTable# 1
+	1--> <b,b> <i,i> 
+	2--> <c,c> <j,j> 
+	3--> <k,k> <d,d> 
+	4--> <l,l> <e,e> 
+	5--> <f,f> 
+	6--> <g,g> 
+	7--> <a,a> <h,h> <o,o> 
+Cmd 20: I v v
+	Inserted in ScopeTable# 1 at position 7, 4
+Cmd 21: P A
+	ScopeTable# 1
+	1--> <b,b> <i,i> 
+	2--> <c,c> <j,j> 
+	3--> <k,k> <d,d> 
+	4--> <l,l> <e,e> 
+	5--> <f,f> 
+	6--> <g,g> 
+	7--> <a,a> <h,h> <o,o> <v,v> 
+Cmd 22: D o
+	Deleted 'o' from ScopeTable# 1 at position 7, 3
+Cmd 23: P A
+	ScopeTable# 1
+	1--> <b,b> <i,i> 
+	2--> <c,c> <j,j> 
+	3--> <k,k> <d,d> 
+	4--> <l,l> <e,e> 
+	5--> <f,f> 
+	6--> <g,g> 
+	7--> <a,a> <h,h> <v,v> 
+Cmd 24: I o o
+	Inserted in ScopeTable# 1 at position 7, 4
+Cmd 25: P A
+	ScopeTable# 1
+	1--> <b,b> <i,i> 
+	2--> <c,c> <j,j> 
+	3--> <k,k> <d,d> 
+	4--> <l,l> <e,e> 
+	5--> <f,f> 
+	6--> <g,g> 
+	7--> <a,a> <h,h> <v,v> <o,o> 
+Cmd 26: D f
+	Deleted 'f' from ScopeTable# 1 at position 5, 1
+Cmd 27: I m m
+	Inserted in ScopeTable# 1 at position 5, 1
+Cmd 28: P A
+	ScopeTable# 1
+	1--> <b,b> <i,i> 
+	2--> <c,c> <j,j> 
+	3--> <k,k> <d,d> 
+	4--> <l,l> <e,e> 
+	5--> <m,m> 
+	6--> <g,g> 
+	7--> <a,a> <h,h> <v,v> <o,o> 
+Cmd 29: L o
+	'o' found in ScopeTable# 1 at position 7, 4
+Cmd 30: L k
+	'k' found in ScopeTable# 1 at position 3, 1
+Cmd 31: L n
+	'n' not found in any of the ScopeTables
+Cmd 32: L h
+	'h' found in ScopeTable# 1 at position 7, 2
+Cmd 33: Q
+	ScopeTable# 1 removed

@@ -1,0 +1,34 @@
+7
+I a a
+I f f
+I h h
+I k k
+I l l
+I g g
+I c c
+P C
+I e e
+I b b
+I i i
+I f c
+I d d
+I j j
+I o o
+I v v
+P A
+D v
+P A
+I v v
+P A
+D o
+P A
+I o o
+P A
+D f
+I m m
+P A
+L o
+L k
+L n
+L h
+Q
