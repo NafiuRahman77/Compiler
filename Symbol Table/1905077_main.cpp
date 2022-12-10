@@ -35,7 +35,7 @@ public:
       symNext=next;
    }
    ~SymbolInfo(){
-    delete symNext;
+    //delete symNext;
  }
 
 
@@ -174,6 +174,7 @@ bool deleteSym(string symbol) {
 
             if(current->getName()==symbol){
                  hashArray[i] = current->getNext();
+                 delete current;
                  cout << "\tDeleted " <<"'"<<symbol<<"' " << "from ScopeTable# " <<unique_id << " at position "<<i+1<<", "<<count+1<<endl;
 
                  return true;
@@ -185,7 +186,7 @@ bool deleteSym(string symbol) {
                      if (current->getName() == symbol) {
                          prev->setNext(current->getNext());
                          cout << "\tDeleted " <<"'"<<symbol<<"' " << "from ScopeTable# " <<unique_id << " at position "<<i+1<<", "<<count+1<<endl;
-                         //delete current;
+                         delete current;
                          return true;
                      }
                      count++;
@@ -249,7 +250,13 @@ bool deleteSym(string symbol) {
 
 
     for (int i=0; i<num_buckets; i++){
-        delete hashArray[i];
+        //delete hashArray[i];
+        SymbolInfo *curr = hashArray[i];
+        while(curr!=nullptr){
+            SymbolInfo *s = curr->getNext();
+            delete curr;
+            curr = s;
+        }
     }
     delete[] hashArray;
 }
