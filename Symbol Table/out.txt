@@ -112,5 +112,7 @@ Cmd 31: L n
 	'n' not found in any of the ScopeTables
 Cmd 32: L h
 	'h' found in ScopeTable# 1 at position 7, 2
-Cmd 33: Q
+Cmd 33: L y
+	'y' not found in any of the ScopeTables
+Cmd 34: Q
 	ScopeTable# 1 removed
