@@ -35,7 +35,7 @@ public:
       symNext=next;
    }
    ~SymbolInfo(){
-    delete symNext;
+    //delete symNext;
  }
 
 
@@ -174,6 +174,7 @@ bool deleteSym(string symbol) {
 
             if(current->getName()==symbol){
                  hashArray[i] = current->getNext();
+                 delete current;
                  cout << "\tDeleted " <<"'"<<symbol<<"' " << "from ScopeTable# " <<unique_id << " at position "<<i+1<<", "<<count+1<<endl;
 
                  return true;
@@ -185,7 +186,7 @@ bool deleteSym(string symbol) {
                      if (current->getName() == symbol) {
                          prev->setNext(current->getNext());
                          cout << "\tDeleted " <<"'"<<symbol<<"' " << "from ScopeTable# " <<unique_id << " at position "<<i+1<<", "<<count+1<<endl;
-                         //delete current;
+                         delete current;
                          return true;
                      }
                      count++;
@@ -231,17 +232,17 @@ bool deleteSym(string symbol) {
      }
    }
 
-   void printScope() {
+   void printScope(ofstream &out) {
 
-    cout << "\tScopeTable# " << unique_id << endl;
+    out << "\tScopeTable# " << unique_id << endl;
     for(int i=0; i<num_buckets; i++){
         SymbolInfo *current = hashArray[i];
-        cout <<"\t"<< i+1 << "--> ";
+        out <<"\t"<< i+1 << "--> ";
         while(current!= nullptr){
-            cout << "<" << current->getName() << "," << current->getType() << "> ";
+            out << "<" << current->getName() << "," << current->getType() << "> ";
             current = current->getNext();
         }
-        cout << endl;
+        out << endl;
     }
 
 }
@@ -249,7 +250,13 @@ bool deleteSym(string symbol) {
 
 
     for (int i=0; i<num_buckets; i++){
-        delete hashArray[i];
+        //delete hashArray[i];
+        SymbolInfo *curr = hashArray[i];
+        while(curr!=nullptr){
+            SymbolInfo *s = curr->getNext();
+            delete curr;
+            curr = s;
+        }
     }
     delete[] hashArray;
 }
@@ -283,13 +290,13 @@ bool removeSymbol(string symbol) {
     bool flag = current->deleteSym(symbol);
     return flag;
 }
-void printCurrentScopeTable() {
-    current->printScope();
+void printCurrentScopeTable(ofstream &out) {
+    current->printScope(out);
 }
-void printAllScopeTable() {
+void printAllScopeTable(ofstream &out) {
     ScopeTable *curr = current;
     while (curr!= nullptr){
-        curr->printScope();
+        curr->printScope(out);
         curr = curr->getParent();
     }
 }
@@ -353,7 +360,7 @@ void enterScope() {
 };
 
 
-int main() {
+/* int main() {
 
 ifstream file;
 file.open("in.txt");
@@ -519,3 +526,4 @@ while(getline(file, line))
 file.close();
 return 0;
 }
+*/
