@@ -48,8 +48,9 @@ unsigned long long int SDBMHash(string str, int n) {
 	for (i = 0; i < len; i++)
 	{
 		hash = (str[i]) + (hash << 6) + (hash << 16) - hash;
-		hash%=n;
+		
 	}
+    hash%=n;
 
 	return hash;
 
@@ -101,7 +102,7 @@ public:
 
     bool insertSym(SymbolInfo *symbol)
     {
-        int pos = SDBMHash(symbol->getName(),num_buckets)%num_buckets;
+        unsigned long long int pos = SDBMHash(symbol->getName(),num_buckets)%num_buckets;
         SymbolInfo* symInf=hashArray[pos];
 
         if( symInf != nullptr){
@@ -232,18 +233,27 @@ bool deleteSym(string symbol) {
      }
    }
 
-   void printScope(ofstream &out) {
+    string printScope() {
+    string str="\tScopeTable# "+to_string(unique_id)+"\n";
 
-    out << "\tScopeTable# " << unique_id << endl;
+    //cout << "\tScopeTable# " << unique_id << endl;
     for(int i=0; i<num_buckets; i++){
         SymbolInfo *current = hashArray[i];
-        out <<"\t"<< i+1 << "--> ";
+        if(hashArray[i]!=nullptr){
+        str+="\t"+to_string(i+1)+"--> ";
+        //cout <<"\t"<< i+1 << "--> ";
         while(current!= nullptr){
-            out << "<" << current->getName() << "," << current->getType() << "> ";
+            //cout << "<" << current->getName() << "," << current->getType() << "> ";
+           
+            str+="<"+current->getName()+","+current->getType()+"> ";
             current = current->getNext();
+            
         }
-        out << endl;
+        str+="\n";
+        //cout << endl;
+        }
     }
+    return str;
 
 }
  ~ScopeTable(){
@@ -270,6 +280,10 @@ private:
     ScopeTable *current;
     int counter;
 public:
+SymbolTable(int bucketSize) {
+    current = new ScopeTable(bucketSize,1);
+    counter=1;
+}
     SymbolTable(ScopeTable *scope) {
     current = scope;
     counter=1;
@@ -281,6 +295,11 @@ ScopeTable* getCurrentScopeTable() const {
 void setCurrentScopeTable(ScopeTable *scope) {
     current = scope;
 }
+bool insertSymbol(string name, string type) {
+     SymbolInfo* s=new SymbolInfo(name, type);
+     bool flag=current->insertSym(s);
+     return flag;
+}
 
 bool insertSymbol(SymbolInfo* symbol) {
      bool flag=current->insertSym(symbol);
@@ -290,15 +309,17 @@ bool removeSymbol(string symbol) {
     bool flag = current->deleteSym(symbol);
     return flag;
 }
-void printCurrentScopeTable(ofstream &out) {
-    current->printScope(out);
+string printCurrentScopeTable() {
+    return current->printScope();
 }
-void printAllScopeTable(ofstream &out) {
+string printAllScopeTable() {
+    string str;
     ScopeTable *curr = current;
     while (curr!= nullptr){
-        curr->printScope(out);
+        str+=curr->printScope();
         curr = curr->getParent();
     }
+    return str;
 }
 
 void exitScope() {
