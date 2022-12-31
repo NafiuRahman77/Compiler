@@ -7,6 +7,11 @@ private:
     string symName;
     string symType;
     SymbolInfo* symNext;
+    int arraySize;  // array size tracker
+    bool isFuncDefined;     // checking if the function is defined
+    string paramName;
+    string paramType;
+    vector<pair<string,string>> params;
 
 public:
 
@@ -15,6 +20,26 @@ public:
     symName = name;
     symType = type;
     symNext= nullptr;
+    arraySize=0;
+    isFuncDefined=false;
+   }
+   SymbolInfo(string name, string type,int size)
+   {
+    symName = name;
+    symType = type;
+    symNext= nullptr;
+    arraySize= size;
+    isFuncDefined=false;
+   }
+   SymbolInfo(string name, string type, vector<pair<string,string>> v)
+   {
+    symName = name;
+    symType = type;
+    symNext= nullptr;
+    arraySize=-1;
+    isFuncDefined=false;
+    params=v;
+
    }
    string getName(){
       return symName;
@@ -34,6 +59,57 @@ public:
    void setNext(SymbolInfo* next ){
       symNext=next;
    }
+
+   void setArraySize(int size)
+   {
+       arraySize = size;
+   }
+
+    int getArraySize()
+    {
+    return this->arraySize;
+    }
+
+    void setIsFuncDefined(bool defined)
+    {   
+    this->isFuncDefined = defined;
+    }
+
+    bool getIsFuncDefined()
+    {
+    return this->isFuncDefined; 
+    }
+
+    void addParameter(string name, string type)
+    {
+    pair<string,string> p(name, type);
+    params.push_back(p);
+    }
+
+    vector<pair<string,string>> getParameterList()
+    {
+    return this->params;
+    }
+
+    int getParameterListSize()
+    {
+    return this->params.size();
+    }
+    bool isArray()
+    {
+    return (arraySize > 0);
+    }
+
+    bool isVariable()
+    {
+    return (arraySize == 0);
+    }
+
+    bool isFunction()
+    {
+    return (arraySize == -1);
+    }
+
    ~SymbolInfo(){
     //delete symNext;
  }
