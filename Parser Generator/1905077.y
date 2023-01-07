@@ -24,6 +24,26 @@ void yyerror(char *s)
 {
 	//write your code
 }
+ int arraySizeExtractor(string var)
+    {
+        stringstream ss(var);
+        string token;
+
+        while(getline(ss, token, '[')){}
+        stringstream ss2(token);
+        getline(ss2, token, ']');
+
+        return stoi(token);
+    }
+
+    string arrayNameExtractor(string var)
+    {
+        stringstream ss(var);
+        string token;
+
+        getline(ss, token, '[');
+        return token;
+    }
 
 vector<string> split(string str, string token){
     vector<string>result;
@@ -192,7 +212,7 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN{
 					error_count++;
 
 						fprintf(error_output, "Error at line %d: Multiple definition of function %s\n\n", line_count, functionName.c_str());
-						fprintf(logout, "Error at line %d: Multiple definition of function %s\n\n", line_count, functionName.c_str());
+						fprintf(log_output, "Error at line %d: Multiple definition of function %s\n\n", line_count, functionName.c_str());
 				}
 				else{
 					vector<pair<string,string>> declaredList=currentFunction->getParameterList();
@@ -287,8 +307,67 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN{
 	fprintf(log_output, "Line %d: func_definition : type_specifier ID LPAREN parameter_list RPAREN compound_statement\n\n%s\n\n\n", line_count, $$->getName().c_str());
 
 }
-		| type_specifier ID LPAREN RPAREN compound_statement
- 		;				
+| type_specifier ID LPAREN RPAREN {
+	string functionType = $1->getName();
+    string functionName = $2->getName();
+    
+    SymbolInfo* currentFunction = table.lookup(functionName);
+	vector<pair<string,string>> parameterList;
+    vector<string> paramPair = split($4->getSymbolName(), ",");
+    vector<string> typeAndName;
+
+    for (string currentParam: paramPair)
+    {
+        typeAndName = split(currentParam, " ");
+        pair<string,string> p(typeAndName[1], typeAndName[0]);
+        parameterList.push_back(p);
+    }
+
+	if(currentFunction!=nullptr){
+			if (currentFunction->isDefined()) // Declared and Defined
+				{
+					error_count++;
+
+					fprintf(error_output, "Error at line %d: Multiple definition of function %s\n\n", line_count, functionName.c_str());
+					fprintf(log_output, "Error at line %d: Multiple definition of function %s\n\n", line_count, functionName.c_str());
+				}
+			else{   vector<pair<string,string>>parameterList;
+					if(parameterList.size()!=currentFunction->getParameterListSize()){
+						error_count++;
+						fprintf(error_output, "Error at line %d: Total number of arguments mismatch with declaration in function %s\n\n", line_count, functionName.c_str());
+						fprintf(log_output, "Error at line %d: Total number of arguments mismatch with declaration in function %s\n\n", line_count, functionName.c_str());
+					}
+					if(currentFunction->getType()!=functionType){
+						error_count++;
+						fprintf(error_output, "Error at line %d: Return type mismatch with function declaration in function %s\n\n", line_count, functionName.c_str());
+						fprintf(log_output, "Error at line %d: Return type mismatch with function declaration in function %s\n\n", line_count, functionName.c_str());
+					}
+					if(!(parameterList.size()!=currentFunction->getParameterListSize()) && !(currentFunction->getType()!=functionType)){
+						table.removeSymbol(functionName);
+                    	SymbolInfo *syminfo = new SymbolInfo(functionName, functionType, parameterList);      	
+                    	syminfo->setIsFuncDefined(true);
+                    	table.insertSymbol(syminfo);
+
+					}
+					
+					}
+                   
+				}
+	else{
+
+        SymbolInfo *syminfo = new SymbolInfo(functionName, functionType, parameterList);
+        syminfo->setIsFuncDefined(true);
+        table.insertSymbol(syminfo);			
+}
+		table.enterScope();
+	}compound_statement
+  {
+    $$ = new SymbolInfo($1->getSymbolName() + " " + $2->getSymbolName() + "()" + $6->getSymbolName() + "\n", "func_definition");
+    fprintf(log_output, "Line %d: func_definition : type_specifier ID LPAREN RPAREN compound_statement\n", line_count);
+    fprintf(log_output,"\n%s\n\n", $2->getSymbolName().c_str());
+ }
+
+;				
 
 
 parameter_list  : parameter_list COMMA type_specifier ID{
@@ -329,7 +408,46 @@ compound_statement : LCURL statements RCURL{
 			}
  		    ;
  		    
-var_declaration : type_specifier declaration_list SEMICOLON
+var_declaration : type_specifier declaration_list SEMICOLON{
+			string varType = $1->getName();
+			string varList = $2->getName();
+			if ($1->getName()=="void"){
+				error_count++;
+				fprintf(error_output, "Error at line %d: Variable type cannot be void \n\n", line_count);
+				fprintf(log_output, "Error at line %d: Variable type cannot be void \n\n", line_count);
+			}
+			else{
+				vector<string> strList = split(varName, ",");
+				for (string current: strList)
+						{
+
+							if ( isArray(current) )
+							{
+								
+								int arraySize = extractArraySize(current);
+								string arrayName = extractArrayName(current);
+								SymbolInfo* temp=new SymbolInfo(arrayName, varType, arraySize);
+								if ( !table.insertSymbol(temp) ) {
+									error_count++;
+									fprintf(error_output, "Error at line %d: Multiple declaration of %s\n\n", line_count, arrayName.c_str());
+									fprintf(log_output, "Error at line %d: Multiple declaration of %s\n\n", line_count, arrayName.c_str());
+							}
+								
+							}
+							else
+							{
+								SymbolInfo* temp=new SymbolInfo(current, varType);
+								if ( !table.insertSymbol(temp) ) {
+									error_count++;
+									fprintf(error_output, "Error at line %d: Multiple declaration of %s\n\n", line_count, current.c_str());
+									fprintf(log_output, "Error at line %d: Multiple declaration of %s\n\n", line_count, current.c_str());
+							}
+								
+							}
+
+						}
+			}
+}
  		 ;
  		 
 type_specifier	: INT{
@@ -427,28 +545,147 @@ expression_statement 	: SEMICOLON	{
 			}
 			;
 	  
-variable : ID 		
-	 | ID LTHIRD expression RTHIRD 
+variable : ID {
+				string returnType;
+				SymbolInfo* currId = table.lookup($1->getName());
+				
+				if (currId == nullptr)
+				{
+					error_count++;
+					fprintf(error_output, "Error at line %d: Undeclared variable %s\n\n", line_count, $1->getName().c_str());
+					fprintf(log_output, "Error at line %d: Undeclared variable %s\n\n", line_count, $1->getName().c_str());
+					$$ = new SymbolInfo($1->getName(),"variable");
+				}
+				else
+				{
+					if (currId->isArray())
+					{
+						$$ = new SymbolInfo(currId->getName(), ERROR, currId->getSize());
+					}
+					else
+					{
+						$$ = new SymbolInfo(currId->getName(), currId->getType());
+					}
+				}
+				printLog(logFile, "variable : ID", $$->getName(), lineCount);
+			}		
+	 | ID LTHIRD expression RTHIRD {
+
+	 }
 	 ;
 	 
- expression : logic_expression	
-	   | variable ASSIGNOP logic_expression 	
+ expression : logic_expression	{
+
+			$$=$1;
+			fprintf(logout, "Line %d: expression : logic_expression\n\n%s\n\n", lineCount, $$->getName().c_str());
+
+ }
+	   | variable ASSIGNOP logic_expression {
+		if ($1->getType()=="void" || $3->getType()=="void"){
+				errorCount++;
+				fprintf(errorout, "Error at line %d: Void function used in expression\n\n", lineCount);
+				fprintf(logout, "Error at line %d: Void function used in expression\n\n", lineCount);
+			}
+			else if ($1->getType()!=$3->getType()){
+				string varType= $1->getType();
+				string exprType= $3->getType();
+				
+				if ($1->isArray() || $3->isArray())
+						{
+							string msg;
+							
+							if ($1->isArray()){
+
+								errorCount++;
+								fprintf(errorout, "Error at line %d: Type mismatch, %s is an array\n\n", lineCount, $1->getName().c_str());
+								fprintf(logout, "Error at line %d: Type mismatch, %s is an array\n\n", lineCount, $1->getName().c_str());
+							}
+							else if ($3->isArray()){
+								
+								errorCount++;
+								fprintf(errorout, "Error at line %d: Type mismatch, %s is an array\n\n", lineCount, $3->getName().c_str());
+								fprintf(logout, "Error at line %d: Type mismatch, %s is an array\n\n", lineCount, $3->getName().c_str());	
+							}					
+							
+						}
+				else if (varType=="float" && exprType=="int") ;
+				else if (varType=="variable" || exprType=="factor") ;
+				else {
+					errorCount++;
+					fprintf(errorout, "Error at line %d: Type Mismatch\n\n", lineCount);
+					fprintf(logout, "Error at line %d: Type Mismatch\n\n", lineCount);
+				}
+			}
+			$$ = new SymbolInfo($1->getName()+"="+$3->getName(), "expression");
+			fprintf(logout, "Line %d: expression : variable ASSIGNOP logic_expression\n\n%s\n\n", lineCount, $$->getName().c_str());
+	   }	
 	   ;
 			
-logic_expression : rel_expression 	
-		 | rel_expression LOGICOP rel_expression 	
+logic_expression : rel_expression {
+			$$=$1;
+			fprintf(logout, "Line %d: logic_expression : rel_expression\n\n%s\n\n", lineCount, $$->getName().c_str());
+}	
+		 | rel_expression LOGICOP rel_expression {
+			if ($1->getType()=="void" || $3->getType()=="void"){
+				errorCount++;
+				fprintf(errorout, "Error at line %d: Void function used in expression\n\n", lineCount);
+				fprintf(logout, "Error at line %d: Void function used in expression\n\n", lineCount);
+			}
+			if ((leftType != "int") || (rightType != "int"))
+				{
+					errorCount++;
+					string msg = "Both operand of " + $2->getName() + " should be int type";
+					fprintf(errorout, "Error at line %d: Both type should be int\n\n", lineCount);
+
+				}
+
+
+			$$ = new SymbolInfo($1->getName() + $2->getName() + $3->getName(),	"int");
+
+			fprintf(logout, "Line %d: logic_expression : rel_expression LOGICOP rel_expression\n\n%s\n\n", lineCount, $$->getName().c_str());
+		 }	
 		 ;
 			
-rel_expression	: simple_expression 
-		| simple_expression RELOP simple_expression	
+rel_expression	: simple_expression {
+			$$=$1;
+			fprintf(logout, "Line %d: rel_expression : simple_expression\n\n%s\n\n", lineCount, $$->getName().c_str());
+}
+		| simple_expression RELOP simple_expression	{
+
+			if ($1->getType()=="void" || $3->getType()=="void"){
+				errorCount++;
+				fprintf(errorout, "Error at line %d: Void function used in expression\n\n", lineCount);
+				fprintf(logout, "Error at line %d: Void function used in expression\n\n", lineCount);
+			}
+			$$ = new SymbolInfo($1->getName()+$2->getName()+$3->getName(), "int");
+			fprintf(logout, "Line %d: rel_expression : simple_expression RELOP simple_expression\n\n%s\n\n", lineCount, $$->getName().c_str());
+		}
 		;
 				
-simple_expression : term 
-		  | simple_expression ADDOP term 
+simple_expression : term {
+
+			$$=$1;
+			fprintf(logout, "Line %d: simple_expression : term\n\n%s\n\n", lineCount, $$->getName().c_str());
+}
+		  | simple_expression ADDOP term {
+
+			string exprType;
+			if(($1->getType()=="int") && ($3->getType()=="int")) exprType= "int"; 
+			else exprType= "float";
+
+			$$ = new SymbolInfo($1->getName()+$2->getName()+$3->getName(), exprType);	
+			fprintf(logout, "Line %d: simple_expression : simple_expression ADDOP term\n\n%s\n\n", lineCount, $$->getName().c_str());
+		  }
 		  ;
 					
-term :	unary_expression
-     |  term MULOP unary_expression
+term :	unary_expression{
+
+		$$=$1;
+		fprintf(logout, "Line %d: term : unary_expression\n\n%s\n\n", lineCount, $$->getName().c_str());
+}
+     |  term MULOP unary_expression{
+		
+	 }
      ;
 
 unary_expression : ADDOP unary_expression  
