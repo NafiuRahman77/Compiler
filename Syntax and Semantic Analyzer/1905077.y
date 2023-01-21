@@ -145,7 +145,6 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON{
 			{
 				error_count++;
 				fprintf(error_output, "Line# %d: Multiple declaration of function %s\n", line_count, name_final.c_str());
-				//fprintf(log_output, "Line# %d: Multiple declaration of function %s\n", line_count, funcName.c_str());
 			}
 			else {
 				vector<pair<string,string>> paramList;
@@ -159,7 +158,6 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON{
 				table.insertSymbol(temp);
 			}
 			
-			//table.enterScope();table.exitScope(); // dummy scope for declaration
 			$$ = new SymbolInfo("type_specifier ID LPAREN parameter_list RPAREN SEMICOLON","func_declaration");
 			fprintf(log_output, "func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON\n");
 
@@ -184,7 +182,6 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON{
 			{
 				error_count++;
 				fprintf(error_output, "Line# %d: Multiple declaration of function %s\n", line_count, name_final.c_str());
-				//fprintf(log_output, "Line# %d: Multiple declaration of function %s\n", line_count, funcName.c_str());
 			}
 			else {
 				vector<pair<string,string>> paramList;
@@ -234,19 +231,16 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 					error_count++;
 
 						fprintf(error_output, "Line# %d: Multiple definition of function %s\n", line_count, functionName.c_str());
-						//fprintf(log_output, "Line# %d: Multiple definition of function %s\n", line_count, functionName.c_str());
 				}
 			else{
 					vector<pair<string,string>> declaredList=currentFunction->getParameterList();
 					if(parameterList.size()!=currentFunction->getParameterListSize()){
 						error_count++;
 						fprintf(error_output, "Line# %d: Conflicting types for %s\n", line_count, functionName.c_str());
-						//fprintf(log_output, "Line# %d: Conflicting types for %s\n", line_count, functionName.c_str());
 					}
 					else if(currentFunction->getType()!=type_final){
 						error_count++;
 						fprintf(error_output, "Line# %d: Conflicting types for %s\n", line_count, functionName.c_str());
-						//fprintf(log_output, "Line# %d: Conflicting types for %s\n", line_count, functionName.c_str());
 					}
 					else{
                         vector<pair<string, string>> declaredParameter=currentFunction->getParameterList();
@@ -304,7 +298,7 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 
 			error_count++;
 			//string msg = "Identifier '" + currentFunction->getName() + "' is not a function.";
-            fprintf(error_output, "Line# %d: %s redeclared as different kind of symbol\n", line_count, currentFunction->getName().c_str());
+            fprintf(error_output, "Line# %d: \'%s\' redeclared as different kind of symbol\n", line_count, currentFunction->getName().c_str());
 			
 		}
 	}
@@ -314,7 +308,7 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 		syminfo->setDataType(functionType);
         table.insertSymbol(syminfo);
        // table.enterScope();
-
+	
         bool multipleParamError = false;
         for(int i=0; i<parameterList.size(); i++)
         {
@@ -333,8 +327,11 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
                     }
                 }
             }
-            if(multipleParamError)
-                break;
+            
+        }
+		if( !multipleParamError){
+        syminfo->setIsFuncDefined(true);
+		syminfo->setDataType(functionType);          
         }
 
 	//fprintf(error_output,"bop bop %d %s\n", syminfo->getParameterListSize(),functionName.c_str());
@@ -542,7 +539,7 @@ var_declaration : type_specifier declaration_list SEMICOLON{
 			if ($1->getDataType()=="void"){
 				error_count++;
 				fprintf(error_output, "Line# %d : Variable or field \'%s\' declared void \n", line_count, varFirst.c_str());
-				//fprintf(log_output, "Variable type cannot be void \n", line_count);
+				
 			}
 			else{
                 for(int i=0;i<vars.size();i++){
@@ -789,8 +786,7 @@ statement : var_declaration{
 			$$->setEnd($3->getEnd());
 			fprintf(log_output, "statement : RETURN expression SEMICOLON\n");
 			if($2->getDataType() == "void") {
-					fprintf(error_output, "Line# %d: Void function called within expression\n", line_count);
-					fprintf(log_output, "Line# %d: Void function called within expression\n", line_count);
+					fprintf(error_output, "Line# %d: Void cannot be used in expression\n", line_count);
                 error_count++;
                 
             } 
@@ -799,7 +795,6 @@ statement : var_declaration{
 
 			//fprintf(error_output, "Line# %s: bop \n", $2->getDataType().c_str());
 			fprintf(error_output, "Line# %d: Return type mismatch\n", line_count);
-			fprintf(log_output, "Line# %d: Return type mismatch %s\n", line_count);
 		}
 	  }
 	  ;
@@ -847,11 +842,9 @@ variable : ID {
 				{
 					if(currId->isArray()){
 					error_count++;
-					//fprintf(error_output, "Line# %d: type mismatch(not variable) \'%s\'\n", line_count, $1->getName().c_str());
-					fprintf(log_output, "Line# %d: type mismatch(not variable) \'%s\'\n", line_count, $1->getName().c_str());	
-						$$ = new SymbolInfo(currId->getName(), "variable");
-					$$->setDataType(currId->getDataType());
-					
+					//fprintf(error_output, "Line# %d: type mismatch(not variable) \'%s\'\n", line_count, $1->getName().c_str());	
+					$$ = new SymbolInfo(currId->getName(), "variable");
+					$$->setDataType(currId->getDataType());	
 					$$->setChildren({$1});
 					$$->setLeftPart("variable");
 					$$->setRightPart("ID");
@@ -891,20 +884,18 @@ variable : ID {
 				 else{
 					$$ = new SymbolInfo($1->getName()+"["+$3->getName()+"]", "variable");
 					$$->setDataType(temp->getDataType());
-					//$$->setArraySize(temp->getArraySize());
-				
-					
+					//$$->setArraySize(temp->getArraySize());				
 				 }
 				
 			}
 			else{
 					error_count++;
-					fprintf(error_output, "Line# %d: \'%s\'is not an array\n", line_count, $1->getName().c_str());
-					fprintf(log_output, "Line# %d: \'%s\'is not an array\'%s\'\n", line_count, $1->getName().c_str());
+					fprintf(error_output, "Line# %d: \'%s\' is not an array\n", line_count, $1->getName().c_str());
+					fprintf(log_output, "Line# %d: \'%s\' is not an array\'%s\'\n", line_count, $1->getName().c_str());
 					
 			}
 
-			$$->setChildren({$1,$2,$3,$4});
+					$$->setChildren({$1,$2,$3,$4});
 					$$->setLeftPart("variable");
 					$$->setRightPart("ID LTHIRD expression RTHIRD ");
 					$$->setStart($1->getStart());
@@ -954,7 +945,6 @@ variable : ID {
 				else {
 					error_count++;
 					//fprintf(error_output, "Line# %d: Type Mismatch\n", line_count);
-					//fprintf(log_output, "Line# %d: Type Mismatch\n", line_count);
 				}
 			}
 			else{
@@ -989,19 +979,15 @@ logic_expression : rel_expression {
 		 | rel_expression LOGICOP rel_expression {
 			if ($1->getDataType()=="void" || $3->getDataType()=="void"){
 				error_count++;
-				//fprintf(error_output, "Line# %d: Void function used in expression\n", line_count);
-				//fprintf(log_output, "Line# %d: Void function used in expression\n", line_count);
+				fprintf(error_output, "Line# %d: Void function used in expression\n", line_count);
 			}
 			if (($1->getDataType() != "int") || ($3->getDataType() != "int"))
 				{
 					error_count++;
-					string msg = "Both operand of " + $2->getName() + " should be int type";
 					fprintf(error_output, "Line# %d: Both type of %s should be int\n", line_count,$2->getName().c_str());
-
 				//	fprintf(error_output, "Line# %s: Both type should be int\n", $3->getDataType().c_str());
 
 				}
-
 
 			$$ = new SymbolInfo($1->getName() + $2->getName() + $3->getName(),	"logic_expression");
 			$$->setDataType("int");
@@ -1030,7 +1016,6 @@ rel_expression	: simple_expression {
 			if ($1->getDataType()=="void" || $3->getDataType()=="void"){
 				error_count++;
 				//fprintf(error_output, "Line# %d: Void function used in expression\n", line_count);
-				//fprintf(log_output, "Line# %d: Void function used in expression\n", line_count);
 			}
 			$$ = new SymbolInfo($1->getName()+$2->getName()+$3->getName(), "int");
 			$$->setDataType("int");
@@ -1069,7 +1054,6 @@ simple_expression : term {
 			if ($1->getDataType()=="void" || $3->getDataType()=="void"){
 				error_count++;
 				//fprintf(error_output, "Line# %d: Void function used in expression \n", line_count);
-				//fprintf(log_output, "Line# %d: Void function used in expression\n", line_count);
 				exprType="void";
 			}
 
@@ -1111,7 +1095,6 @@ term :	unary_expression{
 				
 					error_count++;
 					fprintf(error_output, "Line# %d: Void cannot be used in an expression\n", line_count);
-					//fprintf(log_output, "Line# %d: Void cannot be used in an expression\n", line_count);
 					$$->setDataType("void");
 				
 			}
@@ -1119,12 +1102,11 @@ term :	unary_expression{
 				if($3->getName()=="0"){ 
 					error_count++;
 					fprintf(error_output, "Line# %d: Division by Zero\n", line_count);
-					//fprintf(log_output, "Line# %d: Division by Zero\n", line_count);
 				}
 			}
 			else { 
 				error_count++;
-				fprintf(error_output, "Line# %d:Operands of modulus must be integers\n", line_count);
+				fprintf(error_output, "Line# %d: Operands of modulus must be integers\n", line_count);
 				fprintf(log_output, "Line# %d: Operands of modulus must be integers", line_count);
 				
 			}
@@ -1136,13 +1118,13 @@ term :	unary_expression{
 				
 					error_count++;
 					//fprintf(error_output, "Line# %d: Void cannot be used in an expression\n", line_count);
-					//fprintf(log_output, "Line# %d: Modulus by Zero\n", line_count);
+				
 				
 			}
 			if($3->getName()=="0"){ 
 					error_count++;
 					fprintf(error_output, "Line# %d: Division by Zero\n", line_count);
-					//fprintf(log_output, "Line# %d: Modulus by Zero\n", line_count);
+				
 				}
 				else{
 					if(($1->getDataType()=="int")&&($3->getDataType()=="int")){
@@ -1165,7 +1147,7 @@ term :	unary_expression{
 				
 					error_count++;
 					//fprintf(error_output, "Line# %d: Void cannot be used in an expression\n", line_count);
-					//fprintf(log_output, "Line# %d: Modulus by Zero\n", line_count);
+					
 					$$->setDataType("void");
 				
 			}
@@ -1326,7 +1308,7 @@ factor	: variable {
 	}
 	| CONST_FLOAT{
 
-		$$ = new SymbolInfo(=$1->getName(), "factor");
+		$$ = new SymbolInfo($1->getName(), "factor");
 
 		$$->setDataType("float");
 		$$->setChildren({$1});

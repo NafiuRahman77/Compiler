@@ -1,6 +1,6 @@
 #!/bin/bash
 
-yacc -d -y parser.y -Wcounterexamples
+yacc -d -y 1905077.y -Wcounterexamples
 echo 'Generated the parser C file as well the header file'
 g++ -w -c -o y.o y.tab.c
 echo 'Generated the parser object file'

@@ -85,7 +85,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-êAº[ÒUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+ê—+™˝Ufunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : INT 
@@ -133,7 +133,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-0Äº[ÒUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+0,™˝Ufunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : VOID 
@@ -174,7 +174,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-0Äº[ÒUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+0,™˝Ufunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : INT 
@@ -227,7 +227,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-–Ω[ÒUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+–û,™˝Ufunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : VOID 
@@ -274,7 +274,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-–Ω[ÒUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+–û,™˝Ufunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : INT 
@@ -312,7 +312,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-êvΩ[ÒUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+ê-™˝Ufunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : INT 
@@ -350,7 +350,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-êvΩ[ÒUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+ê-™˝Ufunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : VOID 
@@ -378,7 +378,6 @@ Line# 37: rel_expression : simple_expression
 logic_expression : rel_expression
 expression : logic_expression
 statement : RETURN expression SEMICOLON
-Line# 37: Return type mismatch Ñ,≠˚
 statements : statement
 Line# 38: Token <RCURL> Lexeme } found
 compound_statement : LCURL statements RCURL
@@ -395,7 +394,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-–Ω[ÒUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+–û,™˝Ufunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : INT 
@@ -475,7 +474,7 @@ Line# 45: rel_expression : simple_expression
 logic_expression : rel_expression
 expression : logic_expression
 Line# 45: expression_statement : expression SEMICOLON
-func((2.5),(3.5));
+func(2.5,3.5);
 statement : expression_statement
 statements : statements statement
 Line# 48: Token <ID> Lexeme a found
@@ -496,7 +495,6 @@ arguments : logic_expression
 Line# 48: Token <ID> Lexeme c found
 Line# 48: Token <RPAREN> Lexeme ) found
 variable : id
-Line# 48: type mismatch(not variable) 'c'
 factor : variable
 unary_expression : factor
 term : unary_expression
@@ -627,7 +625,7 @@ Line# 53: simple_expression : term
 Line# 53: rel_expression : simple_expression
 logic_expression : rel_expression
 expression : logic_expression
-Line# 53: 'b'is not an array'b'
+Line# 53: 'b' is not an array'b'
 Line# 53: Token <ASSIGNOP> Lexeme = found
 Line# 53: Token <CONST_INT> Lexeme 7 found
 factor : CONST_INT
@@ -664,7 +662,7 @@ Line# 54: rel_expression : simple_expression
 logic_expression : rel_expression
 expression : variable ASSIGNOP logic_expression
 Line# 54: expression_statement : expression SEMICOLON
-c[(2.5)]=8;
+c[2.5]=8;
 statement : expression_statement
 statements : statements statement
 Line# 55: Token <ID> Lexeme c found
@@ -843,7 +841,7 @@ Line# 59: rel_expression : simple_expression
 logic_expression : rel_expression
 expression : variable ASSIGNOP logic_expression
 Line# 59: expression_statement : expression SEMICOLON
-c[3]=(2.7);
+c[3]=2.7;
 statement : expression_statement
 statements : statements statement
 Line# 60: Token <ID> Lexeme b found
@@ -878,15 +876,14 @@ Line# 61: Token <MULOP> Lexeme % found
 Line# 61: Token <CONST_FLOAT> Lexeme 3.5 found
 factor : CONST_FLOAT
 unary_expression : factor
-Line# 61: Non-Integer operand on modulus operator
-term : term MULOP unary_expression
+Line# 61: Operands of modulus must be integersterm : term MULOP unary_expression
 Line# 61: Token <SEMICOLON> Lexeme ; found
 Line# 61: simple_expression : term
 Line# 61: rel_expression : simple_expression
 logic_expression : rel_expression
 expression : variable ASSIGNOP logic_expression
 Line# 61: expression_statement : expression SEMICOLON
-b=2%(3.5);
+b=2%3.5;
 statement : expression_statement
 statements : statements statement
 Line# 63: Token <ID> Lexeme dd found
@@ -973,7 +970,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-@c¡[ÒUfunc_definition :type_specifier ID LPAREN RPAREN compound_statement 
+p0™˝Ufunc_definition :type_specifier ID LPAREN RPAREN compound_statement 
 unit : func_definition
 program : program unit
 start : program
