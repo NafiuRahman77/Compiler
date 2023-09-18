@@ -170,15 +170,10 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON{
 				table.insertSymbol(temp);
 			}
 			
-			$$ = new SymbolInfo("type_specifier ID LPAREN parameter_list RPAREN SEMICOLON","func_declaration");
+			$$ = new SymbolInfo("","func_declaration");
 			fprintf(log_output, "func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON\n");
 
-			$$->setChildren({$1,$2,$3,$4,$5,$6});
-			$$->setLeftPart("func_declaration");
-			$$->setRightPart("type_specifier ID LPAREN parameter_list RPAREN SEMICOLON");
-			$$->setStart($1->getStart());
-			$$->setEnd($6->getEnd());
-           		params.clear();
+           	params.clear();
 }
 		| type_specifier ID LPAREN RPAREN SEMICOLON{
 				 
@@ -206,25 +201,20 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON{
 				temp->setDataType(type_final);
 				table.insertSymbol(temp);
 			}
-			$$ = new SymbolInfo($1->getName()+" "+$2->getName()+"("+");","func_declaration");
+			$$ = new SymbolInfo("","func_declaration");
 			fprintf(log_output, "func_declaration : type_specifier ID LPAREN RPAREN SEMICOLON\n");
-			$$->setChildren({$1, $2,$3,$4, $5});
-			$$->setLeftPart("func_declaration");
-			$$->setRightPart("type_specifier ID LPAREN RPAREN SEMICOLON");
-			$$->setStart($1->getStart());
-			$$->setEnd($5->getEnd());
-            		params.clear();
+            params.clear();
 		}
 		;
 		 
 func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 	 string functionType = $1->getName();
-    	 string functionName = $2->getName();
+     string functionName = $2->getName();
 	 vector<pair<string,string>> parameterList;
-     	 //vector<string> paramPair = split($4->getSymbolName(), ",");
-     	 vector<string> typeAndName;
+     //vector<string> paramPair = split($4->getSymbolName(), ",");
+     vector<string> typeAndName;
 	 type_final=$1->getDataType();
-     	 name_final=$2->getName();
+     name_final=$2->getName();
      
 
     for (int i=0;i<params.size();i++)
@@ -255,10 +245,10 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 						fprintf(error_output, "Line# %d: Conflicting types for %s\n", line_count, functionName.c_str());
 					}
 					else{
-                        			vector<pair<string, string>> declaredParameter=currentFunction->getParameterList();
-                        			//table.enterScope();
-                        			bool inconsistentReturnTypeError = false;
-                        			for(int i=0; i<parameterList.size(); i++)
+                        vector<pair<string, string>> declaredParameter=currentFunction->getParameterList();
+                        //table.enterScope();
+                        bool inconsistentReturnTypeError = false;
+                        for(int i=0; i<parameterList.size(); i++)
 					{
 
 					    if(parameterList[i].second!=declaredParameter[i].second)
@@ -285,7 +275,7 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 						    error_count++;
 						    //string error_msg = "Multiple declaration of " + parameterList[i] + " in parameter";
 
-								fprintf(error_output, "Line# %d: Redefinition of parameter \'%s\'\n", line_count, (parameterList[i].first).c_str());
+							fprintf(error_output, "Line# %d: Redefinition of parameter \'%s\'\n", line_count, (parameterList[i].first).c_str());
 						    multipleParamError = true;
 						    break;
 						}
@@ -295,8 +285,8 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
                                 		break;
                         	}
                         		if(!inconsistentReturnTypeError || !multipleParamError){                            
-                            				currentFunction->setIsFuncDefined(true);
-							currentFunction->setDataType(functionType);
+                            		currentFunction->setIsFuncDefined(true);
+									currentFunction->setDataType(functionType);
                          
                         	}
                    	 }
@@ -309,16 +299,16 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 
 			error_count++;
 			//string msg = "Identifier '" + currentFunction->getName() + "' is not a function.";
-            		fprintf(error_output, "Line# %d: \'%s\' redeclared as different kind of symbol\n", line_count, currentFunction->getName().c_str());
+            fprintf(error_output, "Line# %d: \'%s\' redeclared as different kind of symbol\n", line_count, currentFunction->getName().c_str());
 			
 		}
 	}
 	else{
 		SymbolInfo *syminfo = new SymbolInfo(functionName, functionType, parameterList);
-        	syminfo->setIsFuncDefined(true);
+        syminfo->setIsFuncDefined(true);
 		syminfo->setDataType(functionType);
-        	table.insertSymbol(syminfo);
-       		// table.enterScope();
+        table.insertSymbol(syminfo);
+       	// table.enterScope();
 	
 		bool multipleParamError = false;
 		for(int i=0; i<parameterList.size(); i++)
@@ -341,35 +331,36 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 
 		}
 		if( !multipleParamError){
-        	syminfo->setIsFuncDefined(true);
+        syminfo->setIsFuncDefined(true);
 		syminfo->setDataType(functionType);          
         }
 
-	//fprintf(error_output,"bop bop %d %s\n", syminfo->getParameterListSize(),functionName.c_str());
-
 	}
+	fprintf(asmout, "\n%s PROC\n", functionName.c_str());
+	fprintf(asmout, "\tPUSH BP\n\tMOV BP, SP\n");
+
 
 } compound_statement{
-		$$=new SymbolInfo("type_specifier ID LPAREN parameter_list RPAREN compound_statement", "func_definition");
-		$$->setChildren({$1,$2,$3,$4,$5,$7});
-		$$->setLeftPart("func_definition");
-		$$->setRightPart("type_specifier ID LPAREN parameter_list RPAREN compound_statement");
-		$$->setStart($1->getStart());
-		$$->setEnd($7->getEnd());
-
+		$$=new SymbolInfo("", "func_definition");
 		fprintf(log_output, "func_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement \n");
+		resetCurrentOffset();
+		fprintf(asmout, "%s_EXIT:\n", $2->getName().c_str());
+		fprintf(asmout, "\tMOV SP, BP ; Restoring SP\n");
+		fprintf(asmout, "\tPOP BP\n");
+		fprintf(asmout, "\tRET %d\n", 2*parameterCount);
+		fprintf(asmout, "%s ENDP\n", $2->getName().c_str());
 
 }
 | type_specifier ID LPAREN RPAREN {
 	   string functionType = $1->getName();
-    	   string functionName = $2->getName();
-    
-    	   SymbolInfo* currentFunction = table.lookUpSymbol(functionName);
+       string functionName = $2->getName();  
+	   if(functionName == "main") isMainDefined=true;  
+       SymbolInfo* currentFunction = table.lookUpSymbol(functionName);
 	   vector<pair<string,string>> parameterList;
 	   vector<pair<string,string>> paramPair;
-    	   vector<string> typeAndName;
+       vector<string> typeAndName;
 	   type_final=$1->getDataType();
-    	   name_final=$2->getName();
+       name_final=$2->getName();
 
 	    for (int i=0;i<params.size();i++)
 	    {
@@ -397,9 +388,9 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 						}
 						if(!(parameterList.size()!=currentFunction->getParameterListSize()) && !(currentFunction->getType()!=functionType)){
 							table.removeSymbol(functionName);
-				SymbolInfo *syminfo = new SymbolInfo(functionName, functionType, parameterList);      	
-				syminfo->setIsFuncDefined(true);
-				table.insertSymbol(syminfo);
+							SymbolInfo *syminfo = new SymbolInfo(functionName, functionType, parameterList);      	
+							syminfo->setIsFuncDefined(true);
+							table.insertSymbol(syminfo);
 
 						}
 
@@ -412,17 +403,29 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 		syminfo->setIsFuncDefined(true);
 		table.insertSymbol(syminfo);			
 	}
+	fprintf(asmout, "\n%s PROC\n", functionName.c_str());
+	if(functionName=="main") {
+		fprintf(asmout, "\tMOV AX, @DATA\n\tMOV DS, AX\n");
+	}
+	fprintf(asmout, "PUSH BP\nMOV BP, SP\n");
 
-		}compound_statement{
 
-			$$=new SymbolInfo("type_specifier ID LPAREN RPAREN compound_statement", "func_definition");
-			$$->setChildren({$1,$2,$3,$4,$6});
-				$$->setLeftPart("func_definition");
-				$$->setRightPart("type_specifier ID LPAREN RPAREN compound_statement");
-				$$->setStart($1->getStart());
-				$$->setEnd($6->getEnd());
+	}compound_statement{
+
+			$$=new SymbolInfo("", "func_definition");
 
 			fprintf(log_output, "func_definition :type_specifier ID LPAREN RPAREN compound_statement \n");
+			resetCurrentOffset();
+			fprintf(asmout, "%s_EXIT:\n", $2->getName().c_str());
+			fprintf(asmout, "\tMOV SP, BP ; Restoring SP\n");
+			fprintf(asmout, "\tPOP BP\n");
+			if($2->getName()=="main") {
+				fprintf(asmout, "\tMOV AH, 4CH\n\tINT 21H\n");
+			} else {
+				fprintf(asmout, "\tRET\n");
+			}
+
+			fprintf(asmout, "%s ENDP\n", $2->getName().c_str());
 
 		}
 
@@ -435,13 +438,6 @@ parameter_list  : parameter_list COMMA type_specifier ID{
 			SymbolInfo s($4->getName(),$3->getDataType());   
 			s.setDataType($3->getDataType());         
             params.push_back(s);
-
-			$$->setChildren({$1,$2,$3,$4});
-			$$->setLeftPart("parameter_list");
-			$$->setRightPart("parameter_list COMMA type_specifier ID");
-			$$->setStart($1->getStart());
-			$$->setEnd($4->getEnd());
-
 			fprintf(log_output, "parameter_list : parameter_list COMMA type_specifier ID\n");
 		}
 		| parameter_list COMMA type_specifier{
@@ -450,11 +446,6 @@ parameter_list  : parameter_list COMMA type_specifier ID{
 			SymbolInfo s("",$3->getDataType()) ; 
 			s.setDataType($3->getDataType());    
             params.push_back(s);
-			$$->setChildren({$1,$2,$3});
-			$$->setLeftPart("parameter_list");
-			$$->setRightPart("parameter_list COMMA type_specifier");
-			$$->setStart($1->getStart());
-			$$->setEnd($3->getEnd());
 			fprintf(log_output, "parameter_list : parameter_list COMMA type_specifier\n");
 		}
  		| type_specifier ID{
@@ -463,12 +454,6 @@ parameter_list  : parameter_list COMMA type_specifier ID{
 			SymbolInfo s($2->getName(),$1->getDataType()); 
 			s.setDataType($1->getDataType());
             params.push_back(s);
-			$$->setChildren({$1,$2});
-			$$->setLeftPart("parameter_list");
-			$$->setRightPart("type_specifier ID");
-			$$->setStart($1->getStart());
-			$$->setEnd($2->getEnd());
-			//fprintf(error_output," ok %s ok %s\n ", params[0].getName().c_str(),params[0].getDataType().c_str());
 			fprintf(log_output, "parameter_list : type_specifier ID\n");
 		}
 		| type_specifier{
@@ -476,12 +461,7 @@ parameter_list  : parameter_list COMMA type_specifier ID{
 			$$ = new SymbolInfo($1->getName(), "parameter_list");
 			SymbolInfo s("",$1->getDataType());
 			s.setDataType($1->getDataType());
-            		params.push_back(s);
-			$$->setChildren({$1});
-			$$->setLeftPart("parameter_list");
-			$$->setRightPart("type_specifier");
-			$$->setStart($1->getStart());
-			$$->setEnd($1->getEnd());
+            params.push_back(s);
 			fprintf(log_output, "parameter_list : type_specifier\n");
 		}
  		;
@@ -489,13 +469,14 @@ parameter_list  : parameter_list COMMA type_specifier ID{
  		
 compound_statement : LCURL{
 				table.enterScope();
-				
-                		for(int i=0; i<params.size(); i++) {
+				parameterCount= params.size();
+                for(int i=0; i<params.size(); i++) {
 					SymbolInfo* s=new SymbolInfo(params[i].getName(),params[i].getDataType());
-					//fprintf(error_output, "debug %s %s\n", params[1].getDataType().c_str(),params[1].getName().c_str());
+					s->setStackOffset((params.size()-i-1)*2+4); // 2 for BP, 2 for ret address
+					s->setGlobal(false);
 					s->setDataType(params[i].getDataType());
 					table.insertSymbol(s);
-                		}
+                }
 				params.clear();
                 
 				} statements RCURL{
@@ -513,14 +494,14 @@ compound_statement : LCURL{
 				table.exitScope();
 }
  		    | LCURL{
-				table.enterScope();
-				 
-				
-                		for(int i=0; i<params.size(); i++) {
-					SymbolInfo* s=new SymbolInfo(params[i].getName(),params[i].getDataType());
-					table.insertSymbol(s);
-					
-            			}
+				table.enterScope();	
+				parameterCount= params.size();		
+                for(int i=0; i<params.size(); i++) {
+				SymbolInfo* s=new SymbolInfo(params[i].getName(),params[i].getDataType());
+				s->setStackOffset((params.size()-i-1)*2+4); // 2 for BP, 2 for ret address
+				s->setGlobal(false);
+				table.insertSymbol(s);	
+            	}
 				params.clear();
 					
 				} RCURL{
@@ -538,13 +519,8 @@ compound_statement : LCURL{
  		    
 var_declaration : type_specifier declaration_list SEMICOLON{
 
-            		$$ = new SymbolInfo((string)$1->getName()+(string)" "+(string)$2->getName()+(string)";"+(string)"\n"+(string)"\n", "var_declaration");
-            		fprintf(log_output, "var_declaration: type_specifier declaration_list SEMICOLON\n");
-			$$->setChildren({$1,$2,$3});
-			$$->setLeftPart("var_declaration");
-			$$->setRightPart("type_specifier declaration_list SEMICOLON");
-			$$->setStart($1->getStart());
-			$$->setEnd($3->getEnd());
+            $$ = new SymbolInfo("", "var_declaration");
+            fprintf(log_output, "var_declaration: type_specifier declaration_list SEMICOLON\n");
 			string varType = $1->getDataType();
 			string varFirst = vars[0].getName();
 			if ($1->getDataType()=="void"){
@@ -556,24 +532,38 @@ var_declaration : type_specifier declaration_list SEMICOLON{
 			for(int i=0;i<vars.size();i++){
 			    if(vars[i].isArray()){
 
-				int arraySize=vars[i].getArraySize();
-				string arrayName=vars[i].getName();
-				SymbolInfo* temp=new SymbolInfo(arrayName, varType, arraySize);
-				temp->setDataType($1->getDataType());
-				bool check=table.insertSymbol(temp);
-				if (!check ) {
-					    SymbolInfo* temp1=table.lookUpSymbol(arrayName);
-					    if($1->getDataType()!=temp1->getDataType() ){
+					int arraySize=vars[i].getArraySize();
+					string arrayName=vars[i].getName();
+					SymbolInfo* temp=new SymbolInfo(arrayName, varType, arraySize);
+					temp->setDataType($1->getDataType());
+					bool check=table.insertSymbol(temp);
+					if (!check ) {
+						    SymbolInfo* temp1=table.lookUpSymbol(arrayName);
+						    if($1->getDataType()!=temp1->getDataType() ){
 
-						error_count++;
-					        fprintf(error_output, "Line# %d: Conflicting types for \'%s\'\n", line_count, vars[i].getName().c_str());
-				       }
-						else{
 							error_count++;
-							fprintf(error_output, "Line# %d: Multiple declaration of %s\n", line_count, arrayName.c_str());
+						        fprintf(error_output, "Line# %d: Conflicting types for \'%s\'\n", line_count, vars[i].getName().c_str());
+					       }
+							else{
+								error_count++;
+								fprintf(error_output, "Line# %d: Multiple declaration of %s\n", line_count, arrayName.c_str());
+							}
+					      }
+					else{
+						if(1==table.getCurrentScopeTable()->getID()) { // global
+							fprintf(asmout, "%s DW %d DUP(?) ; %s[%d] decl\n", arrayName.c_str(), arraySize, arrayName.c_str(), arraySize);
 						}
-				      }
+						else{
+							for(int j=0; j<arraySize; j++){
+								fprintf(asmout, "PUSH AX ; %s[%d] decl\n", arrayName.c_str(), arraySize-1-j);
+								currentOffset-=2;
+							}
+							SymbolInfo* temp= table.lookUpSymbol(arrayName);
+							temp->setStackOffset(currentOffset); // arrayName[arraySize - 1] is at currentOffset[BP]
+							temp->setGlobal(false);
+						}
 
+					}
 
 			    }
 			    else
@@ -584,18 +574,29 @@ var_declaration : type_specifier declaration_list SEMICOLON{
 					    if (!check ) {
 
 				            SymbolInfo* temp1=table.lookUpSymbol(vars[i].getName());
-					    if($1->getDataType()!=temp1->getDataType()){
+					    	if($1->getDataType()!=temp1->getDataType()){
 
-							error_count++;
-							fprintf(error_output, "Line# %d: Conflicting types for \'%s\'\n", line_count, vars[i].getName().c_str());
+								error_count++;
+								fprintf(error_output, "Line# %d: Conflicting types for \'%s\'\n", line_count, vars[i].getName().c_str());
+							}
+							else{
+								error_count++;
+								fprintf(error_output, "Line# %d: Multiple declaration of %s\n", line_count, vars[i].getName().c_str());
+							}
+						}
+						else{
+							if(1==table.getCurrentScopeTable()->getID()) { // global
+								fprintf(asmout, "%s DW ? ; %s decl\n", vars[i].getName().c_str(), vars[i].getName().c_str());
+							}
+							else{
+								fprintf(asmout, "PUSH AX ; %s decl\n", vars[i].getName().c_str());
+								currentOffset-=2;
+								SymbolInfo* temp= table.lookUpSymbol(vars[i].getName());
+								temp->setStackOffset(currentOffset);
+								temp->setGlobal(false);
+							}
+						}
 					}
-					else{
-							error_count++;
-							fprintf(error_output, "Line# %d: Multiple declaration of %s\n", line_count, vars[i].getName().c_str());
-					}
-				}
-
-			}
 			}
 				
 			}
@@ -608,36 +609,21 @@ type_specifier	: INT{
 
 					$$ = new SymbolInfo( "int","type_specifier");
 					string s="int";
-                    			$$->setDataType("int");
-                    			type="int";
-					$$->setChildren({$1});
-					$$->setLeftPart("type_specifier");
-					$$->setRightPart("INT");
-					$$->setStart($1->getStart());
-					$$->setEnd($1->getEnd());
-				    	fprintf(log_output, "type_specifier : INT \n");
+                    $$->setDataType("int");
+                    type="int";
+				    fprintf(log_output, "type_specifier : INT \n");
 		}
  		| FLOAT{
 					$$ = new SymbolInfo( "float","type_specifier");
-                   			$$->setDataType("float");
-                  			type="float";
-				   	$$->setChildren({$1});
-					$$->setLeftPart("type_specifier");
-					$$->setRightPart("FLOAT");
-					$$->setStart($1->getStart());
-					$$->setEnd($1->getEnd());
-                   			fprintf(log_output, "type_specifier : FLOAT \n");
+                   	$$->setDataType("float");
+                  	type="float";
+                   	fprintf(log_output, "type_specifier : FLOAT \n");
 		}
  		| VOID{
 					$$ = new SymbolInfo( "void","type_specifier");
-                   			$$->setDataType("void");
-                    			type="void";
-					$$->setChildren({$1});
-					$$->setLeftPart("type_specifier");
-					$$->setRightPart("VOID");
-					$$->setStart($1->getStart());
-					$$->setEnd($1->getEnd());
-                    			fprintf(log_output, "type_specifier : VOID \n");
+                   	$$->setDataType("void");
+                    type="void";
+                    fprintf(log_output, "type_specifier : VOID \n");
 		}
  		;
 
@@ -646,155 +632,78 @@ declaration_list : declaration_list COMMA ID{
 
 					$$ = new SymbolInfo( $3->getName(), "declaration_list");
 					SymbolInfo s( $3->getName(), "declaration_list");
-                    			vars.push_back(s);
-                    			//name = $3->getName();
-					$$->setChildren({$1,$2,$3});
-					$$->setLeftPart("declaration_list");
-					$$->setRightPart("declaration_list COMMA ID");
-					$$->setStart($1->getStart());
-					$$->setEnd($3->getEnd());
+                    vars.push_back(s);
 					fprintf(log_output, "declaration_list : declaration_list COMMA ID\n");
 			}
  		  | declaration_list COMMA ID LTHIRD CONST_INT RTHIRD{
 					$$ = new SymbolInfo( $3->getName() ,"declaration_list");
-                    			int size=stoi($5->getName());
+                    int size=stoi($5->getName());
 					SymbolInfo s( $3->getName(), "declaration_list", size );
-                    			vars.push_back(s);
-					$$->setChildren({$1,$2,$3,$4,$5,$6});
-					$$->setLeftPart("declaration_list");
-					$$->setRightPart("declaration_list COMMA ID LTHIRD CONST_INT RTHIRD");
-					$$->setStart($1->getStart());
-					$$->setEnd($6->getEnd());
+                    vars.push_back(s);
 					fprintf(log_output, "declaration_list : declaration_list COMMA ID LTHIRD CONST_INT RTHIRD\n",  line_count);
 					}
  		  | ID{
 					$$ = new SymbolInfo($1->getName(), "declaration_list");
 					SymbolInfo s( $1->getName(), "declaration_list");
-                    			vars.push_back(s);
-					$$->setChildren({$1});
-					$$->setLeftPart("declaration_list");
-					$$->setRightPart("ID");
-					$$->setStart($1->getStart());
-					$$->setEnd($1->getEnd());
-                    			name = $1->getName();
+                    vars.push_back(s);
+                    name = $1->getName();
 					fprintf(log_output, "declaration_list : ID\n");
 					}
  		  | ID LTHIRD CONST_INT RTHIRD{
 					$$ = new SymbolInfo($1->getName(),	"declaration_list");
-                    			int size=stoi($3->getName());
-					//fprintf(error_output,"sizeeee %d", size);
+                    int size=stoi($3->getName());
 					SymbolInfo s( $1->getName(), "declaration_list", size );
-                    			vars.push_back(s);
-                    			name = $1->getName();
-					$$->setChildren({$1,$2,$3,$4});
-					$$->setLeftPart("declaration_list");
-					$$->setRightPart("ID LTHIRD CONST_INT RTHIRD");
-					$$->setStart($1->getStart());
-					$$->setEnd($4->getEnd());
+                    vars.push_back(s);
+                    name = $1->getName();			
 					fprintf(log_output, "declaration_list : COMMA ID LTHIRD CONST_INT RTHIRD\n");
 		  }
  		  ;
  		  
 statements : statement{
 					$$ = new SymbolInfo((string)$1->getName(), "statements");
-					$$->setChildren({$1});
-					$$->setLeftPart("statements");
-					$$->setRightPart("statement");
-					$$->setStart($1->getStart());
-					$$->setEnd($1->getEnd());
 					fprintf(log_output, "statements : statement\n");
 			}
 	   | statements statement{
 					$$ = new SymbolInfo($1->getName() + " " + $2->getName(), "statements");
-					$$->setChildren({$1,$2});
-					$$->setLeftPart("statements");
-					$$->setRightPart("statements statement");
-					$$->setStart($1->getStart());
-					$$->setEnd($2->getEnd());	
 					fprintf(log_output, "statements : statements statement\n");	
 	   }
 	   ;
 	   
 statement : var_declaration{
 		$$=new SymbolInfo((string)$1->getName(), "statement");
-		$$->setChildren({$1});
-		$$->setLeftPart("statement");
-		$$->setRightPart("var_declaration");
-		$$->setStart($1->getStart());
-		$$->setEnd($1->getEnd());
 		fprintf(log_output, "statement : var_declaration\n");	
 }
 	  | expression_statement{
 		$$=new SymbolInfo((string)$1->getName(), "statement");
-		$$->setChildren({$1});
-		$$->setLeftPart("statement");
-		$$->setRightPart("expression_statement");
-		$$->setStart($1->getStart());
-		$$->setEnd($1->getEnd());
 		fprintf(log_output, "statement : expression_statement\n");		
 	  }
 	  | compound_statement{
 		$$ = new SymbolInfo((string)$1->getName(), "statement");
-		$$->setChildren({$1});
-		$$->setLeftPart("statement");
-		$$->setRightPart("compound_statement");
-		$$->setStart($1->getStart());
-		$$->setEnd($1->getEnd());
 		fprintf(log_output, "statement : compound_statement\n");
 	  }
 	  | FOR LPAREN expression_statement expression_statement expression RPAREN statement{
 		$$ = new SymbolInfo("for("+$3->getName()+$4->getName()+$5->getName()+")"+$7->getName(), "statement");
-		$$->setChildren({$1, $2, $3, $4, $5, $6, $7});
-		$$->setLeftPart("statement");
-		$$->setRightPart("FOR LPAREN expression_statement expression_statement expression RPAREN statement");
-		$$->setStart($1->getStart());
-		$$->setEnd($7->getEnd());
 		fprintf(log_output, "statement : FOR LPAREN expression_statement expression_statement expression RPAREN statement\n");
 	  }
 	  | IF LPAREN expression RPAREN statement %prec LOWER_THAN_ELSE {
 		$$ = new SymbolInfo("if("+$3->getName()+")"+$5->getName(), "statement");
-		$$->setChildren({$1, $2, $3, $4, $5});
-		$$->setLeftPart("statement");
-		$$->setRightPart("IF LPAREN expression RPAREN statement");
-		$$->setStart($1->getStart());
-		$$->setEnd($5->getEnd());
 		fprintf(log_output, "statement : IF LPAREN expression RPAREN statement\n");
 	  }
 	  | IF LPAREN expression RPAREN statement ELSE statement{
 
 		$$ = new SymbolInfo("if("+$3->getName()+")"+$5->getName()+ "else\n"+$7->getName(), "statement");
-		$$->setChildren({$1, $2, $3, $4, $5, $6, $7});
-		$$->setLeftPart("statement");
-		$$->setRightPart("IF LPAREN expression RPAREN statement ELSE statement");
-		$$->setStart($1->getStart());
-		$$->setEnd($7->getEnd());
 		fprintf(log_output, "statement : IF LPAREN expression RPAREN statement ELSE statement\n");
 	  }
 	  | WHILE LPAREN expression RPAREN statement{
 		$$ = new SymbolInfo("while("+$3->getName()+")"+$5->getName(), "statement");
-		$$->setChildren({$1, $2, $3, $4, $5});
-		$$->setLeftPart("statement");
-		$$->setRightPart("WHILE LPAREN expression RPAREN statement");
-		$$->setStart($1->getStart());
-		$$->setEnd($5->getEnd());
 		fprintf(log_output, "statement : WHILE LPAREN expression RPAREN statement\n");
 	  }
 	  | PRINTLN LPAREN ID RPAREN SEMICOLON{
 		$$ = new SymbolInfo((string)"\t"+(string)"println"+(string)"("+(string)$3->getName()+(string)")"+(string)";"+(string)"\n", "statement");
-		$$->setChildren({$1, $2, $3, $4, $5});
-		$$->setLeftPart("statement");
-		$$->setRightPart("PRINTLN LPAREN ID RPAREN SEMICOLON");
-		$$->setStart($1->getStart());
-		$$->setEnd($5->getEnd());
 		fprintf(log_output, "statement : PRINTLN LPAREN ID RPAREN SEMICOLON\n");
 	  }
 	  | RETURN expression SEMICOLON{
 			$$ = new SymbolInfo((string)"\t"+(string)"return "+(string)$2->getName()+(string)";"+(string)"\n", "statement");
-			$$->setChildren({$1, $2, $3});
-			$$->setLeftPart("statement");
-			$$->setRightPart("RETURN expression SEMICOLON");
-			$$->setStart($1->getStart());
-			$$->setEnd($3->getEnd());
 			fprintf(log_output, "statement : RETURN expression SEMICOLON\n");
 			if($2->getDataType() == "void") {
 					fprintf(error_output, "Line# %d: Void cannot be used in expression\n", line_count);
@@ -803,8 +712,6 @@ statement : var_declaration{
             } 
 			else if($2->getDataType()!=type_final){
 			error_count++;
-
-			//fprintf(error_output, "Line# %s: bop \n", $2->getDataType().c_str());
 			fprintf(error_output, "Line# %d: Return type mismatch\n", line_count);
 		}
 	  }
@@ -812,22 +719,11 @@ statement : var_declaration{
 	  
 expression_statement 	: SEMICOLON	{
 				$$ = new SymbolInfo(";", "expression_statement");
-				$$->setChildren({$1});
-				$$->setLeftPart("expression_statement");
-				$$->setRightPart("SEMICOLON");
-				$$->setStart($1->getStart());
-				$$->setEnd($1->getEnd());
-				
 				fprintf(log_output, "Line# %d: expression_statement : SEMICOLON\n%s\n", line_count, $$->getName().c_str());
 }		
 			| expression SEMICOLON {
 
 				$$ = new SymbolInfo($1->getName() + ";", "expression_statement");
-				$$->setChildren({$1,$2});
-				$$->setLeftPart("expression_statement");
-				$$->setRightPart("expression SEMICOLON");
-				$$->setStart($1->getStart());
-				$$->setEnd($2->getEnd());
 				fprintf(log_output, "Line# %d: expression_statement : expression SEMICOLON\n%s\n", line_count, $$->getName().c_str());
 			}
 			;

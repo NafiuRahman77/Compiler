@@ -9,6 +9,26 @@
 	FLAG DB 0
 	NL DB 13,10,"$"
 	NUMBER_STRING DB "00000$" 
+i DW ? ; i decl
+j DW ? ; j decl
+
+main PROC
+	MOV AX, @DATA
+	MOV DS, AX
+PUSH BP
+MOV BP, SP
+PUSH AX ; k decl
+PUSH AX ; ll decl
+PUSH AX ; m decl
+PUSH AX ; n decl
+PUSH AX ; o decl
+PUSH AX ; p decl
+main_EXIT:
+	MOV SP, BP ; Restoring SP
+	POP BP
+	MOV AH, 4CH
+	INT 21H
+main ENDP
 
 PRINT PROC ; PRINTS A WORD INTEGER IN AX
 LEA SI, NUMBER_STRING ; IS 00000
@@ -41,3 +61,4 @@ MOV AH, 9
 INT 21H
 RET
 PRINT ENDP
+END MAIN
