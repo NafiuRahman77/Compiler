@@ -85,7 +85,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-Á{°˜Ufunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+°aMðtUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : INT 
@@ -133,7 +133,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-0func_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+Ð§MðtUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : VOID 
@@ -174,7 +174,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-0func_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+Ð§MðtUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : INT 
@@ -227,7 +227,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-ÐŽ|°˜Ufunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+pCNðtUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : VOID 
@@ -274,7 +274,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-ÐŽ|°˜Ufunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+pCNðtUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : INT 
@@ -312,7 +312,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-ö|°˜Ufunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+à®NðtUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : INT 
@@ -350,7 +350,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-ö|°˜Ufunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+à®NðtUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : VOID 
@@ -394,7 +394,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-ÐŽ|°˜Ufunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
+pCNðtUfunc_definition :type_specifier ID LPAREN parameter_list RPAREN compound_statement 
 unit : func_definition
 program : program unit
 type_specifier : INT 
@@ -465,7 +465,7 @@ Line# 45: rel_expression : simple_expression
 logic_expression : rel_expression
 arguments : arguments COMMA logic_expression
 argument_list : arguments
-Line# -1334139600: factor : ID LPAREN argument_list RPAREN
+Line# -263447168: factor : ID LPAREN argument_list RPAREN
 unary_expression : factor
 term : unary_expression
 Line# 45: Token <SEMICOLON> Lexeme ; found
@@ -503,7 +503,7 @@ Line# 48: rel_expression : simple_expression
 logic_expression : rel_expression
 arguments : arguments COMMA logic_expression
 argument_list : arguments
-Line# -1334139600: factor : ID LPAREN argument_list RPAREN
+Line# -263447168: factor : ID LPAREN argument_list RPAREN
 unary_expression : factor
 term : unary_expression
 Line# 48: Token <SEMICOLON> Lexeme ; found
@@ -531,7 +531,7 @@ Line# 49: rel_expression : simple_expression
 logic_expression : rel_expression
 arguments : logic_expression
 argument_list : arguments
-Line# -1334139600: factor : ID LPAREN argument_list RPAREN
+Line# -263447168: factor : ID LPAREN argument_list RPAREN
 unary_expression : factor
 term : unary_expression
 Line# 49: Token <SEMICOLON> Lexeme ; found
@@ -579,7 +579,7 @@ Line# 50: rel_expression : simple_expression
 logic_expression : rel_expression
 arguments : arguments COMMA logic_expression
 argument_list : arguments
-Line# -1334139600: factor : ID LPAREN argument_list RPAREN
+Line# -263447168: factor : ID LPAREN argument_list RPAREN
 unary_expression : factor
 term : unary_expression
 Line# 50: Token <SEMICOLON> Lexeme ; found
@@ -700,7 +700,7 @@ Line# 55: rel_expression : simple_expression
 logic_expression : rel_expression
 arguments : logic_expression
 argument_list : arguments
-Line# -1334139600: factor : ID LPAREN argument_list RPAREN
+Line# -263447168: factor : ID LPAREN argument_list RPAREN
 unary_expression : factor
 term : term MULOP unary_expression
 Line# 55: Token <SEMICOLON> Lexeme ; found
@@ -760,7 +760,7 @@ Line# 57: rel_expression : simple_expression
 logic_expression : rel_expression
 arguments : logic_expression
 argument_list : arguments
-Line# -1334139600: factor : ID LPAREN argument_list RPAREN
+Line# -263447168: factor : ID LPAREN argument_list RPAREN
 unary_expression : factor
 term : unary_expression
 Line# 57: Token <SEMICOLON> Lexeme ; found
@@ -806,7 +806,7 @@ Line# 58: rel_expression : simple_expression
 logic_expression : rel_expression
 arguments : logic_expression
 argument_list : arguments
-Line# -1334139600: factor : ID LPAREN argument_list RPAREN
+Line# -263447168: factor : ID LPAREN argument_list RPAREN
 unary_expression : factor
 term : unary_expression
 Line# 58: Token <SEMICOLON> Lexeme ; found
@@ -902,7 +902,7 @@ Line# 63: rel_expression : simple_expression
 logic_expression : rel_expression
 arguments : logic_expression
 argument_list : arguments
-Line# -1334139600: factor : ID LPAREN argument_list RPAREN
+Line# -263447168: factor : ID LPAREN argument_list RPAREN
 unary_expression : factor
 term : unary_expression
 Line# 63: Token <SEMICOLON> Lexeme ; found
@@ -928,7 +928,7 @@ Line# 68: rel_expression : simple_expression
 logic_expression : rel_expression
 arguments : logic_expression
 argument_list : arguments
-Line# -1334139600: factor : ID LPAREN argument_list RPAREN
+Line# -263447168: factor : ID LPAREN argument_list RPAREN
 unary_expression : factor
 term : unary_expression
 Line# 68: Token <SEMICOLON> Lexeme ; found
@@ -970,7 +970,7 @@ compound_statement : LCURL statements RCURL
 	10--> <a,float> <func,int> 
 	11--> <x,int> 
 
-`à€°˜Ufunc_definition :type_specifier ID LPAREN RPAREN compound_statement 
+À.SðtUfunc_definition :type_specifier ID LPAREN RPAREN compound_statement 
 unit : func_definition
 program : program unit
 start : program
