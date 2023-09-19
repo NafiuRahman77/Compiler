@@ -38,7 +38,7 @@ statements : statement
 Line# 6: Token <ID> Lexeme i found
 Line# 6: Token <ASSIGNOP> Lexeme = found
 variable : id
-Line# 6: Token <CONST_INT> Lexeme 2 found
+Line# 6: Token <CONST_INT> Lexeme 1 found
 factor : CONST_INT
 unary_expression : factor
 term : unary_expression
@@ -48,7 +48,7 @@ Line# 6: rel_expression : simple_expression
 logic_expression : rel_expression
 expression : variable ASSIGNOP logic_expression
 Line# 6: expression_statement : expression SEMICOLON
-i=2;
+i=1;
 statement : expression_statement
 statements : statements statement
 Line# 7: Token <LPAREN> Lexeme ( found
@@ -95,23 +95,23 @@ factor : variable
 unary_expression : factor
 term : unary_expression
 Line# 10: simple_expression : term
-Line# 10: Token <ID> Lexeme j found
-Line# 10: Token <MULOP> Lexeme * found
-variable : id
-factor : variable
-unary_expression : factor
-term : unary_expression
 Line# 10: Token <CONST_INT> Lexeme 2 found
 factor : CONST_INT
 unary_expression : factor
-term : term MULOP unary_expression
+term : unary_expression
+Line# 10: Token <MULOP> Lexeme * found
+Line# 10: Token <ID> Lexeme j found
 Line# 10: Token <SEMICOLON> Lexeme ; found
+variable : id
+factor : variable
+unary_expression : factor
+term : term MULOP unary_expression
 simple_expression : simple_expression ADDOP term
 Line# 10: rel_expression : simple_expression
 logic_expression : rel_expression
 expression : variable ASSIGNOP logic_expression
 Line# 10: expression_statement : expression SEMICOLON
-k=(i)+(j)*2;
+k=(i)+2*(j);
 statement : expression_statement
 statements : statements statement
 Line# 11: Token <LPAREN> Lexeme ( found
@@ -132,7 +132,7 @@ term : unary_expression
 Line# 13: Token <CONST_INT> Lexeme 9 found
 factor : CONST_INT
 unary_expression : factor
-Line# 13: Operands of modulus must be integersterm : term MULOP unary_expression
+term : term MULOP unary_expression
 Line# 13: Token <SEMICOLON> Lexeme ; found
 Line# 13: simple_expression : term
 Line# 13: rel_expression : simple_expression
@@ -341,7 +341,7 @@ compound_statement : LCURL statements RCURL
 	7--> <i,int> 
 	8--> <j,int> 
 
-†Á≈çƒUfunc_definition :type_specifier ID LPAREN RPAREN compound_statement 
+ê	ÊCÃUfunc_definition :type_specifier ID LPAREN RPAREN compound_statement 
 unit : func_definition
 program : program unit
 start : program

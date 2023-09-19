@@ -23,15 +23,15 @@ PUSH AX ; m decl
 PUSH AX ; n decl
 PUSH AX ; o decl
 PUSH AX ; p decl
-MOV AX, 0[BP]
+MOV AX, i
 PUSH AX ; i called
-PUSH 2
-POP AX ; r-val of assignop 2
-MOV 0[BP], AX ; assigning 2 to i
+PUSH 1
+POP AX ; r-val of assignop 1
+MOV i, AX
 POP AX
-MOV AX, 0[BP]
+MOV AX, i
 CALL PRINT ; argument i in AX
-MOV AX, 0[BP]
+MOV AX, j
 PUSH AX ; j called
 PUSH 5
 PUSH 8
@@ -40,27 +40,27 @@ POP BX
 ADD AX, BX
 PUSH AX ; 5+8 pushed
 POP AX ; r-val of assignop 5+8
-MOV 0[BP], AX ; assigning 5+8 to j
+MOV j, AX
 POP AX
-MOV AX, 0[BP]
+MOV AX, j
 CALL PRINT ; argument j in AX
 MOV AX, -2[BP]
 PUSH AX ; k called
-MOV AX, 0[BP]
+MOV AX, i
 PUSH AX ; i called
-MOV AX, 0[BP]
-PUSH AX ; j called
 PUSH 2
+MOV AX, j
+PUSH AX ; j called
 POP BX
 POP AX
 IMUL BX
-PUSH AX ; result of (j)*2 is in AX, pushed
+PUSH AX ; result of 2*(j) is in AX, pushed
 POP AX
 POP BX
 ADD AX, BX
-PUSH AX ; (i)+(j)*2 pushed
-POP AX ; r-val of assignop (i)+(j)*2
-MOV -2[BP], AX ; assigning (i)+(j)*2 to k
+PUSH AX ; (i)+2*(j) pushed
+POP AX ; r-val of assignop (i)+2*(j)
+MOV -2[BP], AX ; assigning (i)+2*(j) to k
 POP AX
 MOV AX, -2[BP]
 CALL PRINT ; argument k in AX
@@ -101,9 +101,9 @@ MOV AX, -8[BP]
 CALL PRINT ; argument n in AX
 MOV AX, -10[BP]
 PUSH AX ; o called
-MOV AX, 0[BP]
+MOV AX, i
 PUSH AX ; i called
-MOV AX, 0[BP]
+MOV AX, j
 PUSH AX ; j called
 POP AX
 POP BX ; left side value
@@ -175,7 +175,7 @@ PUSH AX ; k called
 MOV AX, -12[BP]
 PUSH AX ; p called
 POP AX
-NEG AX ; -ÐG‚Nÿ
+NEG AX ; -ðšÃtþ
 PUSH AX
 POP AX ; r-val of assignop -(p)
 MOV -2[BP], AX ; assigning -(p) to k
@@ -183,6 +183,8 @@ POP AX
 MOV AX, -2[BP]
 CALL PRINT ; argument k in AX
 PUSH 0
+POP AX
+	JMP main_EXIT
 main_EXIT:
 	MOV SP, BP ; Restoring SP
 	POP BP

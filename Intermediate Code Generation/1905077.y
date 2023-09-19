@@ -489,11 +489,7 @@ compound_statement : LCURL{
 				fprintf(log_output, "\n%s\n", table.printAllScopeTable().c_str());
 				string allScope=table.printAllScopeTable();
 				fprintf(log_output, "%s",allScope);
-				$$->setChildren({$1,$3,$4});
-				$$->setLeftPart("compound_statement");
-				$$->setRightPart("LCURL statements RCURL");
-				$$->setStart($1->getStart());
-				$$->setEnd($4->getEnd());
+				
 				table.exitScope();
 }
  		    | LCURL{
@@ -510,12 +506,7 @@ compound_statement : LCURL{
 				} RCURL{
 				$$ = new SymbolInfo("{\n}\n","compound_statement");
 				fprintf(log_output, "compound_statement : LCURL RCURL\n");
-          			fprintf(log_output, "%s", table.printAllScopeTable());
-				$$->setChildren({$1,$3});
-				$$->setLeftPart("compound_statement");
-				$$->setRightPart("LCURL RCURL");
-				$$->setStart($1->getStart());
-				$$->setEnd($3->getEnd());
+          		fprintf(log_output, "%s", table.printAllScopeTable());
 				table.exitScope();
 			}
  		    ;
@@ -699,7 +690,7 @@ statement : var_declaration{
 		fprintf(asmout, "%s: ; loop code\n", ("label_for_stmt_"+to_string(forCountStack.top())).c_str());
 	  } statement
 	  {
-		$$ = new SymbolInfo("", "statement");
+		$$ = new SymbolInfo("for("+$3->getName()+$5->getName()+$7->getName()+")"+$10->getName(), "statement");
 		fprintf(log_output, "statement : FOR LPAREN expression_statement expression_statement expression RPAREN statement\n");		//Offline 4 code
 		fprintf(asmout, "JMP %s ; update iterator after stmt\n", ("label_for_ite_"+to_string(forCountStack.top())).c_str());
 	  	fprintf(asmout, "%s: ; end of for loop\n", ("label_for_end_"+to_string(forCountStack.top())).c_str());
@@ -707,7 +698,7 @@ statement : var_declaration{
 	  }
 	  | if_expr statement %prec LOWER_THAN_ELSE
 	  {
-		$$ = new SymbolInfo("" ,"statement");
+		$$ = new SymbolInfo($1->getName()+$2->getName(), "statement");
 		fprintf(log_output, "statement : IF LPAREN expression RPAREN statement\n");
 		fprintf(asmout, "%s: ; end if label\n", ("label_else_"+to_string(ifCountStack.top())).c_str());
 		ifCountStack.pop();
@@ -718,7 +709,7 @@ statement : var_declaration{
 		fprintf(asmout, "%s: ; else label\n", ("label_else_"+to_string(ifCountStack.top())).c_str());
 	  } statement
 	  {
-		$$ = new SymbolInfo("", "statement");
+		$$ = new SymbolInfo($1->getName()+$2->getName()+"else\n"+$5->getName(), "statement");
 		fprintf(log_output, "statement : IF LPAREN expression RPAREN statement ELSE statement\n");		fprintf(asmout, "%s: ; end if label\n", ("label_endif_"+to_string(ifCountStack.top())).c_str());
 		ifCountStack.pop();
 	  }
@@ -740,13 +731,13 @@ statement : var_declaration{
 	  }
 	  | PRINTLN LPAREN ID RPAREN SEMICOLON{
 		SymbolInfo *temp = table.lookUpSymbol($3->getName());
-		$$ = new SymbolInfo("", "statement");
+		$$ = new SymbolInfo("println("+$3->getName()+");", "statement");
 		fprintf(log_output, "statement : PRINTLN LPAREN ID RPAREN SEMICOLON\n");
 		if(temp->isGlobal()) fprintf(asmout, "MOV AX, %s\nCALL PRINT ; argument %s in AX\n", temp->getName().c_str(), temp->getName().c_str());
 		else fprintf(asmout, "MOV AX, %d[BP]\nCALL PRINT ; argument %s in AX\n", temp->getStackOffset(), temp->getName().c_str());
 	  }
 	  | RETURN expression SEMICOLON{
-			$$ = new SymbolInfo((string)"\t"+(string)"return "+(string)$2->getName()+(string)";"+(string)"\n", "statement");
+			$$ = new SymbolInfo("return "+$2->getName()+";", "statement");
 			fprintf(log_output, "statement : RETURN expression SEMICOLON\n");
 			if($2->getDataType() == "void") {
 					fprintf(error_output, "Line# %d: Void cannot be used in expression\n", line_count);
@@ -755,11 +746,11 @@ statement : var_declaration{
             } 
 			else if($2->getDataType()!=type_final){
 			error_count++;
-			fprintf(error_output, "Line# %d: Return type mismatch\n", line_count);
-			fprintf(asmout, "POP AX\n");
-			fprintf(asmout, "\tJMP %s_EXIT\n", currentFunc.c_str());
+			fprintf(error_output, "Line# %d: Return type mismatch\n", line_count);		
 		
-		}
+			}
+		fprintf(asmout, "POP AX\n");
+		fprintf(asmout, "\tJMP %s_EXIT\n", currentFunc.c_str());
 	  }
 	  ;
 
@@ -771,7 +762,7 @@ if_expr :	IF LPAREN expression RPAREN
 		// labelElse= "label_else_"+to_string(ifCount);
 		fprintf(asmout, "POP AX ; expr in AX\nCMP AX, 0 ; checking expr\n");
 		fprintf(asmout, "JE %s\n", ("label_else_"+to_string(ifCountStack.top())).c_str());
-		$$= new SymbolInfo("", "statement");
+		$$= new SymbolInfo("if("+$3->getName()+")", "statement");
 	} 	
 	  
 expression_statement 	: SEMICOLON	{
@@ -801,14 +792,7 @@ variable : ID {
 					}
 				else
 				{
-					if(currId->isArray()){
-					error_count++;
-					//fprintf(error_output, "Line# %d: type mismatch(not variable) \'%s\'\n", line_count, $1->getName().c_str());	
-					$$ = new SymbolInfo(currId->getName(), "variable");
-					$$->setDataType(currId->getDataType());	
-							
-					}
-					else{
+					
 					$$ = new SymbolInfo(currId->getName(), "variable");
 					$$->setDataType(currId->getDataType());
 					$$->setArraySize(0);
@@ -817,9 +801,8 @@ variable : ID {
 					} else {
 						fprintf(asmout, "MOV AX, %d[BP]\nPUSH AX ; %s called\n", currId->getStackOffset(), currId->getName().c_str());
 					}
-					$$ = new SymbolInfo(currId->getName(), currId->getType());
 					$$->setStackOffset(currId->getStackOffset());
-					}
+					
 					
 				}
 			}		
@@ -847,10 +830,10 @@ variable : ID {
 
 					if(temp->isGlobal()) {
 					fprintf(asmout, "POP BX ; popped index expr\nSHL BX, 1\nMOV SI, %s\nMOV AX, BX[SI]\n ; %s called\n", temp->getName().c_str(), temp->getName().c_str()); 
-				} else {
+					} else {
 					fprintf(asmout, "POP BX ; popped index expr %s\nSHL BX, 1\nADD BX, %d\n;ADD BX, BP\nPUSH BP\nADD BP, BX\nMOV AX, [BP]\nPOP BP\n;MOV AX, [BX]\nPUSH AX ; value of %s[%s]\nPUSH BX ; index %s\n",
 					$3->getName().c_str(), temp->getStackOffset(), temp->getName().c_str(), $3->getName().c_str(), $3->getName().c_str());
-				}		
+					}		
 					$$->setStackOffset(temp->getStackOffset());		
 				 }
 				

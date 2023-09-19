@@ -25,7 +25,7 @@ private:
     int stackOffset;
     string code;
     string address;
-    bool isGlobalBool;
+    bool isGlobalBool=true;
 
 public:
     SymbolInfo(string name, string type)

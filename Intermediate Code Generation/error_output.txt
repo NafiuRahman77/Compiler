@@ -1,3 +1,0 @@
-Line# 13: Operands of modulus must be integers
-Line# 22: Both type of || should be int
-Line# 25: Both type of && should be int
