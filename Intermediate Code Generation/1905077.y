@@ -472,7 +472,10 @@ parameter_list  : parameter_list COMMA type_specifier ID{
  		
 compound_statement : LCURL{
 				table.enterScope();
-				parameterCount= params.size();
+				if(params.size()>0){
+					parameterCount= params.size();
+
+				}
                 for(int i=0; i<params.size(); i++) {
 					SymbolInfo* s=new SymbolInfo(params[i].getName(),params[i].getDataType());
 					s->setStackOffset((params.size()-i-1)*2+4); // 2 for BP, 2 for ret address
@@ -494,7 +497,10 @@ compound_statement : LCURL{
 }
  		    | LCURL{
 				table.enterScope();	
-				parameterCount= params.size();		
+				if(params.size()>0){
+					parameterCount= params.size();
+
+				}	
                 for(int i=0; i<params.size(); i++) {
 				SymbolInfo* s=new SymbolInfo(params[i].getName(),params[i].getDataType());
 				s->setStackOffset((params.size()-i-1)*2+4); // 2 for BP, 2 for ret address
