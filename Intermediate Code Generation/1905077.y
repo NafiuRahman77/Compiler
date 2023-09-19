@@ -813,8 +813,9 @@ variable : ID {
 				}
 			}		
 	 | ID LTHIRD expression RTHIRD {
+		
 		SymbolInfo *temp = table.lookUpSymbol($1->getName());
-		$$ = new SymbolInfo($1->getName()+"["+$3->getName()+"]","variable");
+		$$ = new SymbolInfo($1->getName(),"variable");
 		if(temp==nullptr){
 			error_count++;
 			fprintf(error_output, "Line# %d: Undeclared variable %s\n", line_count, $1->getName().c_str());
@@ -830,7 +831,7 @@ variable : ID {
 
            		 }
 				 else{
-					$$ = new SymbolInfo($1->getName()+"["+$3->getName()+"]", "variable");
+					$$ = new SymbolInfo($1->getName(), "variable");
 					$$->setDataType(temp->getDataType());
 					$$->setArraySize(temp->getArraySize()); //CHANGE
 

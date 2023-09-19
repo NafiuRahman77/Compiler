@@ -783,9 +783,9 @@ static const yytype_int16 yyrline[] =
      473,   498,   498,   520,   608,   616,   622,   631,   638,   645,
      652,   662,   666,   672,   676,   680,   684,   688,   694,   684,
      705,   712,   712,   724,   729,   723,   738,   745,   764,   774,
-     778,   786,   815,   859,   867,   925,   930,   964,   970,  1011,
-    1022,  1047,  1055,  1130,  1141,  1153,  1164,  1174,  1249,  1255,
-    1262,  1269,  1282,  1297,  1304,  1312,  1323
+     778,   786,   815,   860,   868,   926,   931,   965,   971,  1012,
+    1023,  1048,  1056,  1131,  1142,  1154,  1165,  1175,  1250,  1256,
+    1263,  1270,  1283,  1298,  1305,  1313,  1324
 };
 #endif
 
@@ -2374,8 +2374,9 @@ yyreduce:
   case 52: /* variable: ID LTHIRD expression RTHIRD  */
 #line 815 "1905077.y"
                                        {
+		
 		SymbolInfo *temp = table.lookUpSymbol((yyvsp[-3].symbol)->getName());
-		(yyval.symbol) = new SymbolInfo((yyvsp[-3].symbol)->getName()+"["+(yyvsp[-1].symbol)->getName()+"]","variable");
+		(yyval.symbol) = new SymbolInfo((yyvsp[-3].symbol)->getName(),"variable");
 		if(temp==nullptr){
 			error_count++;
 			fprintf(error_output, "Line# %d: Undeclared variable %s\n", line_count, (yyvsp[-3].symbol)->getName().c_str());
@@ -2391,7 +2392,7 @@ yyreduce:
 
            		 }
 				 else{
-					(yyval.symbol) = new SymbolInfo((yyvsp[-3].symbol)->getName()+"["+(yyvsp[-1].symbol)->getName()+"]", "variable");
+					(yyval.symbol) = new SymbolInfo((yyvsp[-3].symbol)->getName(), "variable");
 					(yyval.symbol)->setDataType(temp->getDataType());
 					(yyval.symbol)->setArraySize(temp->getArraySize()); //CHANGE
 
@@ -2415,11 +2416,11 @@ yyreduce:
 		}
 
 	 }
-#line 2419 "y.tab.c"
+#line 2420 "y.tab.c"
     break;
 
   case 53: /* expression: logic_expression  */
-#line 859 "1905077.y"
+#line 860 "1905077.y"
                                 {
 
 			(yyval.symbol) = new SymbolInfo((yyvsp[0].symbol)->getName(), "expression");
@@ -2428,11 +2429,11 @@ yyreduce:
 			fprintf(log_output, "expression : logic_expression\n", line_count);
 
  }
-#line 2432 "y.tab.c"
+#line 2433 "y.tab.c"
     break;
 
   case 54: /* expression: variable ASSIGNOP logic_expression  */
-#line 867 "1905077.y"
+#line 868 "1905077.y"
                                                 {
 
 			(yyval.symbol) = new SymbolInfo((yyvsp[-2].symbol)->getName()+"="+(yyvsp[0].symbol)->getName(), "expression");
@@ -2489,21 +2490,21 @@ yyreduce:
 			}
 			fprintf(log_output, "expression : variable ASSIGNOP logic_expression\n");
 	   }
-#line 2493 "y.tab.c"
+#line 2494 "y.tab.c"
     break;
 
   case 55: /* logic_expression: rel_expression  */
-#line 925 "1905077.y"
+#line 926 "1905077.y"
                                   {
 			(yyval.symbol) = new SymbolInfo((yyvsp[0].symbol)->getName(), "logic_expression");
 			(yyval.symbol)->setDataType((yyvsp[0].symbol)->getDataType());
 			fprintf(log_output, "logic_expression : rel_expression\n");
 }
-#line 2503 "y.tab.c"
+#line 2504 "y.tab.c"
     break;
 
   case 56: /* logic_expression: rel_expression LOGICOP rel_expression  */
-#line 930 "1905077.y"
+#line 931 "1905077.y"
                                                          {
 			if ((yyvsp[-2].symbol)->getDataType()=="void" || (yyvsp[0].symbol)->getDataType()=="void"){
 				error_count++;
@@ -2536,22 +2537,22 @@ yyreduce:
 			
 			} 
 		 }
-#line 2540 "y.tab.c"
+#line 2541 "y.tab.c"
     break;
 
   case 57: /* rel_expression: simple_expression  */
-#line 964 "1905077.y"
+#line 965 "1905077.y"
                                     {
 			(yyval.symbol) = new SymbolInfo((yyvsp[0].symbol)->getName() ,	"rel_expression");
 			(yyval.symbol)->setDataType((yyvsp[0].symbol)->getDataType());
 			(yyval.symbol)->setArraySize((yyvsp[0].symbol)->getArraySize());
 			fprintf(log_output, "Line# %d: rel_expression : simple_expression\n", line_count);
 }
-#line 2551 "y.tab.c"
+#line 2552 "y.tab.c"
     break;
 
   case 58: /* rel_expression: simple_expression RELOP simple_expression  */
-#line 970 "1905077.y"
+#line 971 "1905077.y"
                                                                 {
 
 			if ((yyvsp[-2].symbol)->getDataType()=="void" || (yyvsp[0].symbol)->getDataType()=="void"){
@@ -2591,11 +2592,11 @@ yyreduce:
 							
 			}
 		}
-#line 2595 "y.tab.c"
+#line 2596 "y.tab.c"
     break;
 
   case 59: /* simple_expression: term  */
-#line 1011 "1905077.y"
+#line 1012 "1905077.y"
                          {
 
 		    (yyval.symbol) = new SymbolInfo((yyvsp[0].symbol)->getName(), "simple_expression");
@@ -2607,11 +2608,11 @@ yyreduce:
 		//fprintf(error_output, "Line# %d: %s found \n",line_count, $1->getDataType().c_str() );
 			
 }
-#line 2611 "y.tab.c"
+#line 2612 "y.tab.c"
     break;
 
   case 60: /* simple_expression: simple_expression ADDOP term  */
-#line 1022 "1905077.y"
+#line 1023 "1905077.y"
                                                  {
 
 			string exprType;
@@ -2635,11 +2636,11 @@ yyreduce:
 
 			fprintf(log_output, "simple_expression : simple_expression ADDOP term\n", line_count);
 		  }
-#line 2639 "y.tab.c"
+#line 2640 "y.tab.c"
     break;
 
   case 61: /* term: unary_expression  */
-#line 1047 "1905077.y"
+#line 1048 "1905077.y"
                         {
 
 		(yyval.symbol)=new SymbolInfo((yyvsp[0].symbol)->getName(), "term");
@@ -2648,11 +2649,11 @@ yyreduce:
 		fprintf(log_output, "term : unary_expression\n", line_count);
 
 }
-#line 2652 "y.tab.c"
+#line 2653 "y.tab.c"
     break;
 
   case 62: /* term: term MULOP unary_expression  */
-#line 1055 "1905077.y"
+#line 1056 "1905077.y"
                                    {
 
 		(yyval.symbol) = new SymbolInfo((yyvsp[-2].symbol)->getName()+(yyvsp[-1].symbol)->getName()+(yyvsp[0].symbol)->getName(),"term");
@@ -2726,11 +2727,11 @@ yyreduce:
 		fprintf(log_output, "term : term MULOP unary_expression\n" );
 
 	 }
-#line 2730 "y.tab.c"
+#line 2731 "y.tab.c"
     break;
 
   case 63: /* unary_expression: ADDOP unary_expression  */
-#line 1130 "1905077.y"
+#line 1131 "1905077.y"
                                           {
 
 			(yyval.symbol) = new SymbolInfo((yyvsp[-1].symbol)->getName()+(yyvsp[0].symbol)->getName(), "unary_expression");
@@ -2742,11 +2743,11 @@ yyreduce:
 			}
 			fprintf(log_output, "unary_expression : ADDOP unary_expression\n");
 }
-#line 2746 "y.tab.c"
+#line 2747 "y.tab.c"
     break;
 
   case 64: /* unary_expression: NOT unary_expression  */
-#line 1141 "1905077.y"
+#line 1142 "1905077.y"
                                         {
 			
 			(yyval.symbol) = new SymbolInfo("!"+(yyvsp[0].symbol)->getName(), "unary_expression");
@@ -2759,11 +2760,11 @@ yyreduce:
 				, (yyvsp[0].symbol)->getName().c_str(), labelIfTrue.c_str(), labelIfFalse.c_str(), labelIfTrue.c_str(), labelIfFalse.c_str());
 			fprintf(log_output, "unary_expression : NOT unary_expression\n");
 		 }
-#line 2763 "y.tab.c"
+#line 2764 "y.tab.c"
     break;
 
   case 65: /* unary_expression: factor  */
-#line 1153 "1905077.y"
+#line 1154 "1905077.y"
                           {
 
 			(yyval.symbol) = new SymbolInfo((yyvsp[0].symbol)->getName(),"unary_expression");
@@ -2773,11 +2774,11 @@ yyreduce:
 			fprintf(log_output, "unary_expression : factor\n");
 
 		 }
-#line 2777 "y.tab.c"
+#line 2778 "y.tab.c"
     break;
 
   case 66: /* factor: variable  */
-#line 1164 "1905077.y"
+#line 1165 "1905077.y"
                    {
 
 		(yyval.symbol)=new SymbolInfo("("+(yyvsp[0].symbol)->getName()+")", "factor");
@@ -2788,11 +2789,11 @@ yyreduce:
 		}
 		fprintf(log_output, "factor : variable\n");
 }
-#line 2792 "y.tab.c"
+#line 2793 "y.tab.c"
     break;
 
   case 67: /* factor: ID LPAREN argument_list RPAREN  */
-#line 1174 "1905077.y"
+#line 1175 "1905077.y"
                                         {
 		
             (yyval.symbol) = new SymbolInfo((string)(yyvsp[-3].symbol)->getName()+(string)"("+(string)(yyvsp[-1].symbol)->getName()+(string)")", "factor");
@@ -2868,22 +2869,22 @@ yyreduce:
 			fprintf(log_output, "Line# %d: factor : ID LPAREN argument_list RPAREN\n");
 			argumentList.clear();
 	}
-#line 2872 "y.tab.c"
+#line 2873 "y.tab.c"
     break;
 
   case 68: /* factor: LPAREN expression RPAREN  */
-#line 1249 "1905077.y"
+#line 1250 "1905077.y"
                                   {
 		(yyval.symbol) = new SymbolInfo("("+(yyvsp[-1].symbol)->getName()+")", "factor");
 		(yyval.symbol)->setDataType((yyvsp[-1].symbol)->getDataType());
 		
 		fprintf(log_output, "Line# %d: factor : LPAREN expression RPAREN\n", line_count, (yyval.symbol)->getName().c_str());
 	}
-#line 2883 "y.tab.c"
+#line 2884 "y.tab.c"
     break;
 
   case 69: /* factor: CONST_INT  */
-#line 1255 "1905077.y"
+#line 1256 "1905077.y"
                     {
 
 		(yyval.symbol) = new SymbolInfo((yyvsp[0].symbol)->getName(), "factor");
@@ -2891,11 +2892,11 @@ yyreduce:
 		fprintf(asmout, "PUSH %s\n", (yyval.symbol)->getName().c_str());
 		fprintf(log_output, "factor : CONST_INT\n");
 	}
-#line 2895 "y.tab.c"
+#line 2896 "y.tab.c"
     break;
 
   case 70: /* factor: CONST_FLOAT  */
-#line 1262 "1905077.y"
+#line 1263 "1905077.y"
                      {
 
 		(yyval.symbol) = new SymbolInfo((yyvsp[0].symbol)->getName(), "factor");
@@ -2903,11 +2904,11 @@ yyreduce:
 		(yyval.symbol)->setDataType("float");
 		fprintf(log_output, "factor : CONST_FLOAT\n");
 	}
-#line 2907 "y.tab.c"
+#line 2908 "y.tab.c"
     break;
 
   case 71: /* factor: variable INCOP  */
-#line 1269 "1905077.y"
+#line 1270 "1905077.y"
                          {
 
 		(yyval.symbol) = new SymbolInfo((yyvsp[-1].symbol)->getName()+"++","variable");
@@ -2921,11 +2922,11 @@ yyreduce:
 		}
 		fprintf(log_output, "factor : variable INCOP\n");
 	}
-#line 2925 "y.tab.c"
+#line 2926 "y.tab.c"
     break;
 
   case 72: /* factor: variable DECOP  */
-#line 1282 "1905077.y"
+#line 1283 "1905077.y"
                         {
 
 		(yyval.symbol) = new SymbolInfo((yyvsp[-1].symbol)->getName()+"++","variable");
@@ -2939,11 +2940,11 @@ yyreduce:
 		}
 		fprintf(log_output, "factor : variable DECOP\n");
 	}
-#line 2943 "y.tab.c"
+#line 2944 "y.tab.c"
     break;
 
   case 73: /* argument_list: arguments  */
-#line 1297 "1905077.y"
+#line 1298 "1905077.y"
                          {
 
 				(yyval.symbol) = new SymbolInfo((yyvsp[0].symbol)->getName(), "argument_list");
@@ -2951,22 +2952,22 @@ yyreduce:
 				fprintf(log_output, "argument_list : arguments\n");
 				
 }
-#line 2955 "y.tab.c"
+#line 2956 "y.tab.c"
     break;
 
   case 74: /* argument_list: %empty  */
-#line 1304 "1905077.y"
+#line 1305 "1905077.y"
                            {
 
 				(yyval.symbol)=new SymbolInfo("", "argument_list");
 				
 				fprintf(log_output, "argument_list : \n");
 			  }
-#line 2966 "y.tab.c"
+#line 2967 "y.tab.c"
     break;
 
   case 75: /* arguments: arguments COMMA logic_expression  */
-#line 1312 "1905077.y"
+#line 1313 "1905077.y"
                                             {
 
 				(yyval.symbol) = new SymbolInfo((yyvsp[-2].symbol)->getName()+","+(yyvsp[0].symbol)->getName(), "arguments");
@@ -2978,11 +2979,11 @@ yyreduce:
 				
 				argumentList.push_back(s);
 }
-#line 2982 "y.tab.c"
+#line 2983 "y.tab.c"
     break;
 
   case 76: /* arguments: logic_expression  */
-#line 1323 "1905077.y"
+#line 1324 "1905077.y"
                                 {
 				(yyval.symbol) = new SymbolInfo((yyvsp[0].symbol)->getName(), "arguments");
 				//$$->setDataType($1->getDataType());
@@ -2993,11 +2994,11 @@ yyreduce:
 				
 				argumentList.push_back(s);
 		  }
-#line 2997 "y.tab.c"
+#line 2998 "y.tab.c"
     break;
 
 
-#line 3001 "y.tab.c"
+#line 3002 "y.tab.c"
 
       default: break;
     }
@@ -3190,7 +3191,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 1336 "1905077.y"
+#line 1337 "1905077.y"
 
 int main(int argc,char *argv[])
 {
