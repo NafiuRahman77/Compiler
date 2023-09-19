@@ -3,7 +3,7 @@ int main(){
  
 	int k,ll,m,n,o,p;
  
-	i = 1;
+	i = 2;
 	println(i);
 	j = 5 + 8;
 	println(j);

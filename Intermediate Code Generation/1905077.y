@@ -843,7 +843,8 @@ variable : ID {
 				 else{
 					$$ = new SymbolInfo($1->getName()+"["+$3->getName()+"]", "variable");
 					$$->setDataType(temp->getDataType());
-					//$$->setArraySize(temp->getArraySize());
+					$$->setArraySize(temp->getArraySize()); //CHANGE
+
 					if(temp->isGlobal()) {
 					fprintf(asmout, "POP BX ; popped index expr\nSHL BX, 1\nMOV SI, %s\nMOV AX, BX[SI]\n ; %s called\n", temp->getName().c_str(), temp->getName().c_str()); 
 				} else {
@@ -861,12 +862,6 @@ variable : ID {
 					
 			}
 
-					$$->setChildren({$1,$2,$3,$4});
-					$$->setLeftPart("variable");
-					$$->setRightPart("ID LTHIRD expression RTHIRD ");
-					$$->setStart($1->getStart());
-					$$->setEnd($4->getEnd());
-
 		}
 
 	 }
@@ -877,11 +872,6 @@ variable : ID {
 			$$ = new SymbolInfo($1->getName(), "expression");
 			type=$1->getDataType();
 			$$->setDataType($1->getDataType());
-			$$->setChildren({$1});
-			$$->setLeftPart("expression");
-			$$->setRightPart("logic_expression ");
-			$$->setStart($1->getStart());
-			$$->setEnd($1->getEnd());
 			fprintf(log_output, "expression : logic_expression\n", line_count);
 
  }
@@ -922,11 +912,23 @@ variable : ID {
 			}
 			$$->setDataType($1->getDataType());
 			type=$1->getDataType();
-			$$->setChildren({$1,$2,$3});
-			$$->setLeftPart("expression");
-			$$->setRightPart("variable ASSIGNOP logic_expression");
-			$$->setStart($1->getStart());
-			$$->setEnd($3->getEnd());
+
+			string varName= $1->getName();
+			
+			fprintf(asmout, "POP AX ; r-val of assignop %s\n", $3->getName().c_str());
+			
+			SymbolInfo* temp = table.lookUpSymbol(varName);
+			if(temp->isGlobal()){
+				fprintf(asmout, "MOV %s, AX\n", temp->getName().c_str());
+			} else {
+				if ($1->isArray()){
+					fprintf(asmout, "POP BX\n");
+					fprintf(asmout, ";MOV [BX], AX\nPUSH BP\nADD BP, BX\nMOV [BP], AX\nPOP BP ; assigning to %s\n", $1->getName().c_str());
+				}
+				else {
+					fprintf(asmout, "MOV %d[BP], AX ; assigning %s to %s\n", $1->getStackOffset(), $3->getName().c_str(), $1->getName().c_str());
+				}
+			}
 			fprintf(log_output, "expression : variable ASSIGNOP logic_expression\n");
 	   }	
 	   ;
@@ -934,12 +936,6 @@ variable : ID {
 logic_expression : rel_expression {
 			$$ = new SymbolInfo($1->getName(), "logic_expression");
 			$$->setDataType($1->getDataType());
-			$$->setArraySize($1->getArraySize());
-			$$->setChildren({$1});
-			$$->setLeftPart("logic_expression");
-			$$->setRightPart("rel_expression");
-			$$->setStart($1->getStart());
-			$$->setEnd($1->getEnd());
 			fprintf(log_output, "logic_expression : rel_expression\n");
 }	
 		 | rel_expression LOGICOP rel_expression {
@@ -957,12 +953,22 @@ logic_expression : rel_expression {
 
 			$$ = new SymbolInfo($1->getName() + $2->getName() + $3->getName(),	"logic_expression");
 			$$->setDataType("int");
-			$$->setChildren({$1,$2,$3});
-			$$->setLeftPart("logic_expression");
-			$$->setRightPart("rel_expression LOGICOP rel_expression");
-			$$->setStart($1->getStart());
-			$$->setEnd($3->getEnd());
 			fprintf(log_output, "logic_expression : rel_expression LOGICOP rel_expression\n");
+
+			// Offline 4 code
+			fprintf(asmout, "POP BX\nPOP AX ; left side value\n");
+			string labelIfTrue=newLabel();
+			string labelIfFalse=newLabel(); 
+
+			if($2->getName()=="&&"){
+				fprintf(asmout, "CMP AX, 0\nJE %s\nCMP BX, 0\nJE %s\nPUSH 1\nJMP %s\n", labelIfFalse.c_str(), labelIfFalse.c_str(), labelIfTrue.c_str());
+				fprintf(asmout, "%s:\nPUSH 0 ; total false\n%s:\n", labelIfFalse.c_str(), labelIfTrue.c_str());
+			
+			} else if($2->getName()=="||"){
+				fprintf(asmout, "CMP AX, 0\nJNE %s\nCMP BX, 0\nJNE %s\nPUSH 0\nJMP %s\n", labelIfFalse.c_str(), labelIfFalse.c_str(), labelIfTrue.c_str());
+				fprintf(asmout, "%s:\nPUSH 1 ; total false\n%s:\n", labelIfFalse.c_str(), labelIfTrue.c_str());
+			
+			} 
 		 }	
 		 ;
 			
@@ -970,11 +976,6 @@ rel_expression	: simple_expression {
 			$$ = new SymbolInfo($1->getName() ,	"rel_expression");
 			$$->setDataType($1->getDataType());
 			$$->setArraySize($1->getArraySize());
-			$$->setChildren({$1});
-			$$->setLeftPart("rel_expression");
-			$$->setRightPart("simple_expression");
-			$$->setStart($1->getStart());
-			$$->setEnd($1->getEnd());
 			fprintf(log_output, "Line# %d: rel_expression : simple_expression\n", line_count);
 }
 		| simple_expression RELOP simple_expression	{
@@ -985,12 +986,36 @@ rel_expression	: simple_expression {
 			}
 			$$ = new SymbolInfo($1->getName()+$2->getName()+$3->getName(), "int");
 			$$->setDataType("int");
-			$$->setChildren({$1,$2,$3});
-			$$->setLeftPart("rel_expression");
-			$$->setRightPart("simple_expression RELOP simple_expression	");
-			$$->setStart($1->getStart());
-			$$->setEnd($3->getEnd());
 			fprintf(log_output, "rel_expression : simple_expression RELOP simple_expression\n", line_count);
+			// Offline 4 code
+			fprintf(asmout, "POP AX\nPOP BX ; left side value\nCMP BX, AX ; evaluating %s\n", $$->getName().c_str());
+			string labelIfTrue=newLabel();
+			string labelIfFalse=newLabel(); 
+			if($2->getName()=="<"){
+				fprintf(asmout, "JNL %s\nPUSH 1 ; if %s is true\nJMP %s\n", labelIfFalse.c_str(), $$->getName().c_str(), labelIfTrue.c_str());
+				fprintf(asmout, "%s:\nPUSH 0 ; if %s is false\n%s:\n",labelIfFalse.c_str(), $$->getName().c_str(), labelIfTrue.c_str());
+			
+			} else if($2->getName()=="<="){
+				fprintf(asmout, "JNLE %s\nPUSH 1 ; if %s is true\nJMP %s\n", labelIfFalse.c_str(), $$->getName().c_str(), labelIfTrue.c_str());
+				fprintf(asmout, "%s:\nPUSH 0 ; if %s is false\n%s:\n",labelIfFalse.c_str(), $$->getName().c_str(), labelIfTrue.c_str());
+			
+			} else if($2->getName()==">"){
+				fprintf(asmout, "JNG %s\nPUSH 1 ; if %s is true\nJMP %s\n", labelIfFalse.c_str(), $$->getName().c_str(), labelIfTrue.c_str());
+				fprintf(asmout, "%s:\nPUSH 0 ; if %s is false\n%s:\n",labelIfFalse.c_str(), $$->getName().c_str(), labelIfTrue.c_str());
+		
+			} else if($2->getName()==">="){
+				fprintf(asmout, "JNGE %s\nPUSH 1 ; if %s is true\nJMP %s\n", labelIfFalse.c_str(), $$->getName().c_str(), labelIfTrue.c_str());
+				fprintf(asmout, "%s:\nPUSH 0 ; if %s is false\n%s:\n",labelIfFalse.c_str(), $$->getName().c_str(), labelIfTrue.c_str());
+			
+			} else if($2->getName()=="=="){
+				fprintf(asmout, "JNE %s\nPUSH 1 ; if %s is true\nJMP %s\n", labelIfFalse.c_str(), $$->getName().c_str(), labelIfTrue.c_str());
+				fprintf(asmout, "%s:\nPUSH 0 ; if %s is false\n%s:\n",labelIfFalse.c_str(), $$->getName().c_str(), labelIfTrue.c_str());
+			
+			} else if($2->getName()=="!="){
+				fprintf(asmout, "JE %s\nPUSH 1 ; if %s is true\nJMP %s\n", labelIfFalse.c_str(), $$->getName().c_str(), labelIfTrue.c_str());
+				fprintf(asmout, "%s:\nPUSH 0 ; if %s is false\n%s:\n",labelIfFalse.c_str(), $$->getName().c_str(), labelIfTrue.c_str());
+							
+			}
 		}
 		;
 				
@@ -999,11 +1024,6 @@ simple_expression : term {
 		    $$ = new SymbolInfo($1->getName(), "simple_expression");
 			$$->setDataType($1->getDataType());
 			$$->setArraySize($1->getArraySize());
-			$$->setChildren({$1});
-			$$->setLeftPart("simple_expression");
-			$$->setRightPart("term");
-			$$->setStart($1->getStart());
-			$$->setEnd($1->getEnd());
 			fprintf(log_output, "Line# %d: simple_expression : term\n", line_count);
 
 
@@ -1025,11 +1045,12 @@ simple_expression : term {
 
 			$$ = new SymbolInfo($1->getName()+$2->getName()+$3->getName(), "simple_expression");
 			$$->setDataType(exprType);
-			$$->setChildren({$1, $2, $3});
-			$$->setLeftPart("simple_expression");
-			$$->setRightPart("simple_expression ADDOP term");
-			$$->setStart($1->getStart());
-			$$->setEnd($3->getEnd());	
+
+			if($2->getName()=="+")
+				fprintf(asmout, "POP AX\nPOP BX\nADD AX, BX\nPUSH AX ; %s+%s pushed\n", $1->getName().c_str(), $3->getName().c_str());
+			else 
+				fprintf(asmout, "POP AX\nPOP BX\nSUB BX, AX\nPUSH BX ; %s-%s pushed\n", $1->getName().c_str(), $3->getName().c_str()); //! check minus	
+
 			fprintf(log_output, "simple_expression : simple_expression ADDOP term\n", line_count);
 		  }
 		  ;
@@ -1039,23 +1060,13 @@ term :	unary_expression{
 		$$=new SymbolInfo($1->getName(), "term");
 		$$->setDataType($1->getDataType());
 		$$->setArraySize($1->getArraySize());
-		$$->setChildren({$1});
-		$$->setLeftPart("term");
-		$$->setRightPart("unary_expression");
-		$$->setStart($1->getStart());
-		$$->setEnd($1->getEnd());
-		
 		fprintf(log_output, "term : unary_expression\n", line_count);
 
 }
      |  term MULOP unary_expression{
 
 		$$ = new SymbolInfo($1->getName()+$2->getName()+$3->getName(),"term");
-		$$->setChildren({$1, $2,$3});
-		$$->setLeftPart("term");
-		$$->setRightPart("term MULOP unary_expression");
-		$$->setStart($1->getStart());
-		$$->setEnd($3->getEnd());
+		
 		if($2->getName()=="%"){ 
 			if(($1->getDataType()=="void") || ($3->getDataType()=="void")){
 				
@@ -1077,6 +1088,8 @@ term :	unary_expression{
 				
 			}
 			$$->setDataType("int");
+			fprintf(asmout, "MOV DX, 0 ; DX:AX = 0000:AX\nPOP BX\nPOP AX\nIDIV BX\nPUSH DX ; remainder of %s is in DX\n", $$->getName().c_str());
+
 			
 		}
 		else if($2->getName()=="/"){
@@ -1100,6 +1113,7 @@ term :	unary_expression{
 						$$->setDataType("float");
 					}
 				}
+			fprintf(asmout, "POP BX\nPOP AX\nIDIV BX\nPUSH AX ; result of %s is in AX, pushed\n", $$->getName().c_str());; //! division
 		}
 		else{
 			
@@ -1117,7 +1131,7 @@ term :	unary_expression{
 					$$->setDataType("void");
 				
 			}
-			
+			fprintf(asmout, "POP BX\nPOP AX\nIMUL BX\nPUSH AX ; result of %s is in AX, pushed\n", $$->getName().c_str());
 		}
 		fprintf(log_output, "term : term MULOP unary_expression\n" );
 
@@ -1128,11 +1142,11 @@ unary_expression : ADDOP unary_expression {
 
 			$$ = new SymbolInfo($1->getName()+$2->getName(), "unary_expression");
 			$$->setDataType($2->getDataType());
-			$$->setChildren({$1,$2});
-			$$->setLeftPart("unary_expression");
-			$$->setRightPart("ADDOP unary_expression");
-			$$->setStart($1->getStart());
-			$$->setEnd($2->getEnd());
+			//Offline 4
+			if($1->getName()=="-"){
+				//! pls do
+				fprintf(asmout, "POP AX\nNEG AX ; -%s\nPUSH AX\n", $2->getName());
+			}
 			fprintf(log_output, "unary_expression : ADDOP unary_expression\n");
 } 
 		 | NOT unary_expression {
@@ -1140,11 +1154,11 @@ unary_expression : ADDOP unary_expression {
 			$$ = new SymbolInfo("!"+$2->getName(), "unary_expression");
 			$$->setDataType($2->getDataType());
 			$$->setDataType("int");
-			$$->setChildren({$1,$2});
-			$$->setLeftPart("unary_expression");
-			$$->setRightPart("NOT unary_expression");
-			$$->setStart($1->getStart());
-			$$->setEnd($2->getEnd());
+			string labelIfTrue=newLabel();
+			string labelIfFalse=newLabel();
+			fprintf(asmout, "POP AX\nCMP AX, 0 ; !%s\nJNE %s\nMOV AX, 1\nJMP %s\n\
+				\n%s:\nXOR AX, AX\n%s:\nPUSH AX\n"
+				, $2->getName().c_str(), labelIfTrue.c_str(), labelIfFalse.c_str(), labelIfTrue.c_str(), labelIfFalse.c_str());
 			fprintf(log_output, "unary_expression : NOT unary_expression\n");
 		 }
 		 | factor {
@@ -1152,11 +1166,7 @@ unary_expression : ADDOP unary_expression {
 			$$ = new SymbolInfo($1->getName(),"unary_expression");
 			$$->setDataType($1->getDataType());
 			$$->setArraySize($1->getArraySize());
-			$$->setChildren({$1});
-			$$->setLeftPart("unary_expression");
-			$$->setRightPart("ADDOP unary_expression");
-			$$->setStart($1->getStart());
-			$$->setEnd($1->getEnd());
+			
 			fprintf(log_output, "unary_expression : factor\n");
 
 		 }
@@ -1167,21 +1177,14 @@ factor	: variable {
 		$$=new SymbolInfo("("+$1->getName()+")", "factor");
 		$$->setDataType($1->getDataType());
 		$$->setArraySize($1->getArraySize());
-		$$->setChildren({$1});
-		$$->setLeftPart("factor");
-		$$->setRightPart("variable");
-		$$->setStart($1->getStart());
-		$$->setEnd($1->getEnd());
+		if($$->isArray()){
+			fprintf(asmout, "POP BX ; r-value, no need for index\n");
+		}
 		fprintf(log_output, "factor : variable\n");
 }
 	| ID LPAREN argument_list RPAREN{
 		
             $$ = new SymbolInfo((string)$1->getName()+(string)"("+(string)$3->getName()+(string)")", "factor");
-			$$->setChildren({$1,$2,$3,$4});
-					$$->setLeftPart("factor");
-					$$->setRightPart("ID LPAREN argument_list RPAREN");
-					$$->setStart($1->getStart());
-					$$->setEnd($4->getEnd());
 			SymbolInfo* temp = table.lookUpSymbol($1->getName());
 			
 
@@ -1238,6 +1241,10 @@ factor	: variable {
 
                     } else {
                         $$->setDataType(temp->getDataType());
+						fprintf(asmout, "CALL %s\n", $1->getName().c_str());
+						if(temp->getDataType()!="void"){
+							fprintf(asmout, "PUSH AX ; return value of %s\n", $1->getName().c_str());
+						}
                     }
                 } 
 				}
@@ -1253,11 +1260,6 @@ factor	: variable {
 	| LPAREN expression RPAREN{
 		$$ = new SymbolInfo("("+$2->getName()+")", "factor");
 		$$->setDataType($2->getDataType());
-		$$->setChildren({$1,$2,$3});
-		$$->setLeftPart("factor");
-		$$->setRightPart("LPAREN expression RPAREN");
-		$$->setStart($1->getStart());
-		$$->setEnd($3->getEnd());
 		
 		fprintf(log_output, "Line# %d: factor : LPAREN expression RPAREN\n", line_count, $$->getName().c_str());
 	}
@@ -1265,11 +1267,7 @@ factor	: variable {
 
 		$$ = new SymbolInfo($1->getName(), "factor");
 		$$->setDataType("int");
-		$$->setChildren({$1});
-		$$->setLeftPart("factor");
-		$$->setRightPart("CONST_INT");
-		$$->setStart($1->getStart());
-		$$->setEnd($1->getEnd());
+		fprintf(asmout, "PUSH %s\n", $$->getName().c_str());
 		fprintf(log_output, "factor : CONST_INT\n");
 	}
 	| CONST_FLOAT{
@@ -1277,33 +1275,32 @@ factor	: variable {
 		$$ = new SymbolInfo($1->getName(), "factor");
 
 		$$->setDataType("float");
-		$$->setChildren({$1});
-		$$->setLeftPart("factor");
-		$$->setRightPart("CONST_FLOAT");
-		$$->setStart($1->getStart());
-		$$->setEnd($1->getEnd());
 		fprintf(log_output, "factor : CONST_FLOAT\n");
 	}
 	| variable INCOP {
 
 		$$ = new SymbolInfo($1->getName()+"++","variable");
 		$$->setDataType($1->getDataType());
-		$$->setChildren({$1,$2});
-		$$->setLeftPart("factor");
-		$$->setRightPart("variable INCOP");
-		$$->setStart($1->getStart());
-		$$->setEnd($2->getEnd());
+		if ($1->isArray()){
+			fprintf(asmout, "POP BX\nPOP AX\nINC AX ; %s++\n", $1->getName().c_str());
+			fprintf(asmout, "PUSH BP\nADD BP, BX\nMOV [BP], AX\nPOP BP\n");
+		}
+		else {
+			fprintf(asmout, "INC AX\nMOV %d[BP], AX\n", $1->getStackOffset());
+		}
 		fprintf(log_output, "factor : variable INCOP\n");
 	}
 	| variable DECOP{
 
 		$$ = new SymbolInfo($1->getName()+"++","variable");
 		$$->setDataType($1->getDataType());
-		$$->setChildren({$1,$2});
-		$$->setLeftPart("factor");
-		$$->setRightPart("variable DECOP");
-		$$->setStart($1->getStart());
-		$$->setEnd($2->getEnd());
+		if ($1->isArray()){
+			fprintf(asmout, "POP BX\nPOP AX\nDEC AX ; %s++\n", $1->getName().c_str());
+			fprintf(asmout, "PUSH BP\nADD BP, BX\nMOV [BP], AX\nPOP BP\n");
+		}
+		else {
+			fprintf(asmout, "DEC AX\nMOV %d[BP], AX\n", $1->getStackOffset());
+		}
 		fprintf(log_output, "factor : variable DECOP\n");
 	}
 	;
@@ -1313,20 +1310,12 @@ argument_list : arguments{
 				$$ = new SymbolInfo($1->getName(), "argument_list");
 
 				fprintf(log_output, "argument_list : arguments\n");
-				$$->setChildren({$1});
-				$$->setLeftPart("argument_list");
-				$$->setRightPart("arguments");
-				$$->setStart($1->getStart());
-				$$->setEnd($1->getEnd());
+				
 }
 			  |{
 
 				$$=new SymbolInfo("", "argument_list");
-				$$->setChildren({});
-				$$->setLeftPart("argument_list");
-				$$->setRightPart("");
-				$$->setStart(line_count);
-				$$->setEnd(line_count);
+				
 				fprintf(log_output, "argument_list : \n");
 			  }
 			  ;
@@ -1339,11 +1328,7 @@ arguments : arguments COMMA logic_expression{
 				SymbolInfo s("",$3->getDataType());
 				s.setDataType($3->getDataType());
 				s.setArraySize($3->getArraySize());
-				$$->setChildren({$1,$2,$3});
-				$$->setLeftPart("arguments");
-				$$->setRightPart("arguments COMMA logic_expression");
-				$$->setStart($1->getStart());
-				$$->setEnd($3->getEnd());
+				
 				argumentList.push_back(s);
 }
 	      | logic_expression{
@@ -1353,11 +1338,7 @@ arguments : arguments COMMA logic_expression{
 				SymbolInfo s("",$1->getDataType());
 				s.setDataType($1->getDataType());
 				s.setArraySize($1->getArraySize());
-				$$->setChildren({$1});
-				$$->setLeftPart("arguments");
-				$$->setRightPart("logic_expression");
-				$$->setStart($1->getStart());
-				$$->setEnd($1->getEnd());
+				
 				argumentList.push_back(s);
 		  }
 	      ;
