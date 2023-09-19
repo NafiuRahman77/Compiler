@@ -23,6 +23,80 @@ PUSH AX ; m decl
 PUSH AX ; n decl
 PUSH AX ; o decl
 PUSH AX ; p decl
+MOV AX, 0[BP]
+PUSH AX ; i called
+POP AX
+MOV AX, 0[BP]
+CALL PRINT ; argument i in AX
+MOV AX, 0[BP]
+PUSH AX ; j called
+POP AX
+MOV AX, 0[BP]
+CALL PRINT ; argument j in AX
+MOV AX, -2[BP]
+PUSH AX ; k called
+MOV AX, 0[BP]
+PUSH AX ; i called
+MOV AX, 0[BP]
+PUSH AX ; j called
+POP AX
+MOV AX, -2[BP]
+CALL PRINT ; argument k in AX
+MOV AX, -6[BP]
+PUSH AX ; m called
+MOV AX, -2[BP]
+PUSH AX ; k called
+POP AX
+MOV AX, -6[BP]
+CALL PRINT ; argument m in AX
+MOV AX, -8[BP]
+PUSH AX ; n called
+MOV AX, -6[BP]
+PUSH AX ; m called
+MOV AX, -4[BP]
+PUSH AX ; ll called
+POP AX
+MOV AX, -8[BP]
+CALL PRINT ; argument n in AX
+MOV AX, -10[BP]
+PUSH AX ; o called
+MOV AX, 0[BP]
+PUSH AX ; i called
+MOV AX, 0[BP]
+PUSH AX ; j called
+POP AX
+MOV AX, -10[BP]
+CALL PRINT ; argument o in AX
+MOV AX, -12[BP]
+PUSH AX ; p called
+MOV AX, -8[BP]
+PUSH AX ; n called
+MOV AX, -10[BP]
+PUSH AX ; o called
+POP AX
+MOV AX, -12[BP]
+CALL PRINT ; argument p in AX
+MOV AX, -12[BP]
+PUSH AX ; p called
+MOV AX, -8[BP]
+PUSH AX ; n called
+MOV AX, -10[BP]
+PUSH AX ; o called
+POP AX
+MOV AX, -12[BP]
+CALL PRINT ; argument p in AX
+MOV AX, -12[BP]
+PUSH AX ; p called
+POP AX
+MOV AX, -12[BP]
+CALL PRINT ; argument p in AX
+MOV AX, -2[BP]
+PUSH AX ; k called
+MOV AX, -12[BP]
+PUSH AX ; p called
+POP AX
+MOV AX, -2[BP]
+CALL PRINT ; argument k in AX
 main_EXIT:
 	MOV SP, BP ; Restoring SP
 	POP BP

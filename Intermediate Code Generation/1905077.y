@@ -92,7 +92,7 @@ void yyerror(char *s)
 
 %token<symbol> IF ELSE FOR WHILE INT FLOAT DOUBLE CHAR RETURN VOID PRINTLN DO BREAK SWITCH CASE DEFAULT CONTINUE ASSIGNOP NOT SEMICOLON COMMA LPAREN RPAREN LCURL RCURL LTHIRD RTHIRD INCOP DECOP MAIN 
 %token <symbol> ID ADDOP MULOP RELOP LOGICOP CONST_INT CONST_FLOAT
-%type <symbol> declaration_list type_specifier var_declaration unit program func_declaration func_definition parameter_list factor variable expression logic_expression argument_list arguments rel_expression simple_expression start term unary_expression statement statements compound_statement expression_statement
+%type <symbol> declaration_list type_specifier var_declaration unit program func_declaration func_definition parameter_list factor variable expression logic_expression argument_list arguments rel_expression simple_expression start term unary_expression statement statements compound_statement expression_statement if_expr
 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
@@ -147,7 +147,7 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON{
 			//string returnType = $1->getName();
 			//string funcName = $2->getName();
 			type_final=$1->getDataType();
-            		name_final=$2->getName();
+            name_final=$2->getName();
             
 			SymbolInfo* temp = table.lookUpSymbol(type_final);
 			vector<string> paramTypeList;
@@ -166,7 +166,7 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON{
 				
 				SymbolInfo* temp=new SymbolInfo(name_final, type_final, paramList);
 				temp->setDataType(type_final);
-			    	temp->setIsFuncDefined(false);
+			    temp->setIsFuncDefined(false);
 				table.insertSymbol(temp);
 			}
 			
@@ -180,7 +180,7 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON{
 			//string returnType = $1->getName();
 			//string funcName = $2->getName();
 			type_final=$1->getDataType();
-           		name_final=$2->getName();
+           	name_final=$2->getName();
 			SymbolInfo* temp = table.lookUpSymbol(name_final);
 			vector<string> paramTypeList;
     			vector<string> typeAndName;
@@ -197,7 +197,7 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON{
                 	}
 				
 				SymbolInfo* temp=new SymbolInfo(name_final, type_final, paramList);
-			    	temp->setIsFuncDefined(false);
+			    temp->setIsFuncDefined(false);
 				temp->setDataType(type_final);
 				table.insertSymbol(temp);
 			}
@@ -215,6 +215,7 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
      vector<string> typeAndName;
 	 type_final=$1->getDataType();
      name_final=$2->getName();
+	 currentFunc=functionName;
      
 
     for (int i=0;i<params.size();i++)
@@ -352,15 +353,17 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 
 }
 | type_specifier ID LPAREN RPAREN {
-	   string functionType = $1->getName();
-       string functionName = $2->getName();  
-	   if(functionName == "main") isMainDefined=true;  
-       SymbolInfo* currentFunction = table.lookUpSymbol(functionName);
-	   vector<pair<string,string>> parameterList;
-	   vector<pair<string,string>> paramPair;
-       vector<string> typeAndName;
-	   type_final=$1->getDataType();
-       name_final=$2->getName();
+	   	string functionType = $1->getName();
+       	string functionName = $2->getName();  
+	   	if(functionName == "main") isMainDefined=true;  
+       	SymbolInfo* currentFunction = table.lookUpSymbol(functionName);
+	   	vector<pair<string,string>> parameterList;
+	   	vector<pair<string,string>> paramPair;
+       	vector<string> typeAndName;
+	   	type_final=$1->getDataType();
+       	name_final=$2->getName();
+	   	currentFunc=functionName;
+
 
 	    for (int i=0;i<params.size();i++)
 	    {
@@ -681,26 +684,66 @@ statement : var_declaration{
 		$$ = new SymbolInfo((string)$1->getName(), "statement");
 		fprintf(log_output, "statement : compound_statement\n");
 	  }
-	  | FOR LPAREN expression_statement expression_statement expression RPAREN statement{
-		$$ = new SymbolInfo("for("+$3->getName()+$4->getName()+$5->getName()+")"+$7->getName(), "statement");
-		fprintf(log_output, "statement : FOR LPAREN expression_statement expression_statement expression RPAREN statement\n");
+	  | FOR LPAREN expression_statement {
+		forCount++;
+		forCountStack.push(forCount);
+		fprintf(asmout, "%s: ; for loop starting label\n", ("label_for_start_"+to_string(forCountStack.top())).c_str());
+	  } expression_statement {
+	  	fprintf(asmout, "CMP AX, 0\n");
+	  	fprintf(asmout, "JE %s ; loop ending condn\n", ("label_for_end_"+to_string(forCountStack.top())).c_str());
+	  	fprintf(asmout, "JMP %s ; loop code label\n", ("label_for_stmt_"+to_string(forCountStack.top())).c_str());
+	  	fprintf(asmout, "%s: ; loop iterator inc/dec\n", ("label_for_ite_"+to_string(forCountStack.top())).c_str());
+	  	
+	  } expression RPAREN {
+		fprintf(asmout, "JMP %s ; restart loop\n", ("label_for_start_"+to_string(forCountStack.top())).c_str());
+		fprintf(asmout, "%s: ; loop code\n", ("label_for_stmt_"+to_string(forCountStack.top())).c_str());
+	  } statement
+	  {
+		$$ = new SymbolInfo("", "statement");
+		fprintf(log_output, "statement : FOR LPAREN expression_statement expression_statement expression RPAREN statement\n");		//Offline 4 code
+		fprintf(asmout, "JMP %s ; update iterator after stmt\n", ("label_for_ite_"+to_string(forCountStack.top())).c_str());
+	  	fprintf(asmout, "%s: ; end of for loop\n", ("label_for_end_"+to_string(forCountStack.top())).c_str());
+	  	forCountStack.pop();
 	  }
-	  | IF LPAREN expression RPAREN statement %prec LOWER_THAN_ELSE {
-		$$ = new SymbolInfo("if("+$3->getName()+")"+$5->getName(), "statement");
+	  | if_expr statement %prec LOWER_THAN_ELSE
+	  {
+		$$ = new SymbolInfo("" ,"statement");
 		fprintf(log_output, "statement : IF LPAREN expression RPAREN statement\n");
+		fprintf(asmout, "%s: ; end if label\n", ("label_else_"+to_string(ifCountStack.top())).c_str());
+		ifCountStack.pop();
 	  }
-	  | IF LPAREN expression RPAREN statement ELSE statement{
+	  | if_expr statement ELSE {
 
-		$$ = new SymbolInfo("if("+$3->getName()+")"+$5->getName()+ "else\n"+$7->getName(), "statement");
-		fprintf(log_output, "statement : IF LPAREN expression RPAREN statement ELSE statement\n");
+		fprintf(asmout, "JMP %s\n", ("label_endif_"+to_string(ifCountStack.top())).c_str());
+		fprintf(asmout, "%s: ; else label\n", ("label_else_"+to_string(ifCountStack.top())).c_str());
+	  } statement
+	  {
+		$$ = new SymbolInfo("", "statement");
+		fprintf(log_output, "statement : IF LPAREN expression RPAREN statement ELSE statement\n");		fprintf(asmout, "%s: ; end if label\n", ("label_endif_"+to_string(ifCountStack.top())).c_str());
+		ifCountStack.pop();
 	  }
-	  | WHILE LPAREN expression RPAREN statement{
-		$$ = new SymbolInfo("while("+$3->getName()+")"+$5->getName(), "statement");
+
+	  | WHILE 
+	  {
+		whileCount++;
+		whileCountStack.push(whileCount);
+		fprintf(asmout, "%s: ; while loop begin\n", ("label_while_start_"+to_string(whileCountStack.top())).c_str());
+	  } LPAREN expression RPAREN 
+	  {
+		fprintf(asmout, "POP CX\nCMP CX, 0\nJE %s\n", ("label_while_end_"+to_string(whileCountStack.top())).c_str());
+	  } statement
+	  {
+		$$ = new SymbolInfo("while("+$4->getName()+")"+$7->getName(), "statement");
 		fprintf(log_output, "statement : WHILE LPAREN expression RPAREN statement\n");
+		fprintf(asmout, "JMP %s ; back to top of loop\n%s:\n", ("label_while_start_"+to_string(whileCountStack.top())).c_str(), ("label_while_end_"+to_string(whileCountStack.top())).c_str());
+		whileCountStack.pop();
 	  }
 	  | PRINTLN LPAREN ID RPAREN SEMICOLON{
-		$$ = new SymbolInfo((string)"\t"+(string)"println"+(string)"("+(string)$3->getName()+(string)")"+(string)";"+(string)"\n", "statement");
+		SymbolInfo *temp = table.lookUpSymbol($3->getName());
+		$$ = new SymbolInfo("", "statement");
 		fprintf(log_output, "statement : PRINTLN LPAREN ID RPAREN SEMICOLON\n");
+		if(temp->isGlobal()) fprintf(asmout, "MOV AX, %s\nCALL PRINT ; argument %s in AX\n", temp->getName().c_str(), temp->getName().c_str());
+		else fprintf(asmout, "MOV AX, %d[BP]\nCALL PRINT ; argument %s in AX\n", temp->getStackOffset(), temp->getName().c_str());
 	  }
 	  | RETURN expression SEMICOLON{
 			$$ = new SymbolInfo((string)"\t"+(string)"return "+(string)$2->getName()+(string)";"+(string)"\n", "statement");
@@ -713,9 +756,23 @@ statement : var_declaration{
 			else if($2->getDataType()!=type_final){
 			error_count++;
 			fprintf(error_output, "Line# %d: Return type mismatch\n", line_count);
+			fprintf(asmout, "POP AX\n");
+			fprintf(asmout, "\tJMP %s_EXIT\n", currentFunc.c_str());
+		
 		}
 	  }
 	  ;
+
+
+if_expr :	IF LPAREN expression RPAREN 
+	{
+		ifCount++;
+		ifCountStack.push(ifCount);
+		// labelElse= "label_else_"+to_string(ifCount);
+		fprintf(asmout, "POP AX ; expr in AX\nCMP AX, 0 ; checking expr\n");
+		fprintf(asmout, "JE %s\n", ("label_else_"+to_string(ifCountStack.top())).c_str());
+		$$= new SymbolInfo("", "statement");
+	} 	
 	  
 expression_statement 	: SEMICOLON	{
 				$$ = new SymbolInfo(";", "expression_statement");
@@ -725,6 +782,7 @@ expression_statement 	: SEMICOLON	{
 
 				$$ = new SymbolInfo($1->getName() + ";", "expression_statement");
 				fprintf(log_output, "Line# %d: expression_statement : expression SEMICOLON\n%s\n", line_count, $$->getName().c_str());
+				fprintf(asmout, "POP AX\n");
 			}
 			;
 	  
@@ -739,11 +797,7 @@ variable : ID {
 					fprintf(error_output, "Line# %d: Undeclared variable \'%s\'\n", line_count, $1->getName().c_str());
 					fprintf(log_output, "Line# %d: Undeclared variable \'%s\'\n", line_count, $1->getName().c_str());
 					$$ = new SymbolInfo($1->getName(),"variable");
-					$$->setChildren({$1});
-					$$->setLeftPart("variable");
-					$$->setRightPart("ID");
-					$$->setStart($1->getStart());
-					$$->setEnd($1->getEnd());
+					
 					}
 				else
 				{
@@ -752,21 +806,19 @@ variable : ID {
 					//fprintf(error_output, "Line# %d: type mismatch(not variable) \'%s\'\n", line_count, $1->getName().c_str());	
 					$$ = new SymbolInfo(currId->getName(), "variable");
 					$$->setDataType(currId->getDataType());	
-					$$->setChildren({$1});
-					$$->setLeftPart("variable");
-					$$->setRightPart("ID");
-					$$->setStart($1->getStart());
-					$$->setEnd($1->getEnd());		
+							
 					}
 					else{
 					$$ = new SymbolInfo(currId->getName(), "variable");
 					$$->setDataType(currId->getDataType());
 					$$->setArraySize(0);
-					$$->setChildren({$1});
-					$$->setLeftPart("variable");
-					$$->setRightPart("ID");
-					$$->setStart($1->getStart());
-					$$->setEnd($1->getEnd());
+					if(currId->isGlobal()) {
+						fprintf(asmout, "MOV AX, %s\nPUSH AX ; %s called\n", currId->getName().c_str(), currId->getName().c_str());
+					} else {
+						fprintf(asmout, "MOV AX, %d[BP]\nPUSH AX ; %s called\n", currId->getStackOffset(), currId->getName().c_str());
+					}
+					$$ = new SymbolInfo(currId->getName(), currId->getType());
+					$$->setStackOffset(currId->getStackOffset());
 					}
 					
 				}
@@ -791,7 +843,14 @@ variable : ID {
 				 else{
 					$$ = new SymbolInfo($1->getName()+"["+$3->getName()+"]", "variable");
 					$$->setDataType(temp->getDataType());
-					//$$->setArraySize(temp->getArraySize());				
+					//$$->setArraySize(temp->getArraySize());
+					if(temp->isGlobal()) {
+					fprintf(asmout, "POP BX ; popped index expr\nSHL BX, 1\nMOV SI, %s\nMOV AX, BX[SI]\n ; %s called\n", temp->getName().c_str(), temp->getName().c_str()); 
+				} else {
+					fprintf(asmout, "POP BX ; popped index expr %s\nSHL BX, 1\nADD BX, %d\n;ADD BX, BP\nPUSH BP\nADD BP, BX\nMOV AX, [BP]\nPOP BP\n;MOV AX, [BX]\nPUSH AX ; value of %s[%s]\nPUSH BX ; index %s\n",
+					$3->getName().c_str(), temp->getStackOffset(), temp->getName().c_str(), $3->getName().c_str(), $3->getName().c_str());
+				}		
+					$$->setStackOffset(temp->getStackOffset());		
 				 }
 				
 			}

@@ -132,7 +132,7 @@ term : unary_expression
 Line# 13: Token <CONST_INT> Lexeme 9 found
 factor : CONST_INT
 unary_expression : factor
-term : term MULOP unary_expression
+Line# 13: Operands of modulus must be integersterm : term MULOP unary_expression
 Line# 13: Token <SEMICOLON> Lexeme ; found
 Line# 13: simple_expression : term
 Line# 13: rel_expression : simple_expression
@@ -341,7 +341,7 @@ compound_statement : LCURL statements RCURL
 	7--> <i,int> 
 	8--> <j,int> 
 
-ÐÈ+þUfunc_definition :type_specifier ID LPAREN RPAREN compound_statement 
+`¾5	Vfunc_definition :type_specifier ID LPAREN RPAREN compound_statement 
 unit : func_definition
 program : program unit
 start : program
