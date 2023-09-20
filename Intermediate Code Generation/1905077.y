@@ -147,7 +147,7 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON{
 			//string returnType = $1->getName();
 			//string funcName = $2->getName();
 			type_final=$1->getDataType();
-            name_final=$2->getName();
+            		name_final=$2->getName();
             
 			SymbolInfo* temp = table.lookUpSymbol(type_final);
 			vector<string> paramTypeList;
@@ -166,7 +166,7 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON{
 				
 				SymbolInfo* temp=new SymbolInfo(name_final, type_final, paramList);
 				temp->setDataType(type_final);
-			    temp->setIsFuncDefined(false);
+			    	temp->setIsFuncDefined(false);
 				table.insertSymbol(temp);
 			}
 			
@@ -180,7 +180,7 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON{
 			//string returnType = $1->getName();
 			//string funcName = $2->getName();
 			type_final=$1->getDataType();
-           	name_final=$2->getName();
+           		name_final=$2->getName();
 			SymbolInfo* temp = table.lookUpSymbol(name_final);
 			vector<string> paramTypeList;
     			vector<string> typeAndName;
@@ -197,24 +197,24 @@ func_declaration : type_specifier ID LPAREN parameter_list RPAREN SEMICOLON{
                 	}
 				
 				SymbolInfo* temp=new SymbolInfo(name_final, type_final, paramList);
-			    temp->setIsFuncDefined(false);
+			    	temp->setIsFuncDefined(false);
 				temp->setDataType(type_final);
 				table.insertSymbol(temp);
 			}
 			$$ = new SymbolInfo("","func_declaration");
 			fprintf(log_output, "func_declaration : type_specifier ID LPAREN RPAREN SEMICOLON\n");
-            params.clear();
+            		params.clear();
 		}
 		;
 		 
-func_definition : type_specifier ID LPAREN parameter_list RPAREN {
+	 func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 	 string functionType = $1->getName();
-     string functionName = $2->getName();
+     	 string functionName = $2->getName();
 	 vector<pair<string,string>> parameterList;
-     //vector<string> paramPair = split($4->getSymbolName(), ",");
-     vector<string> typeAndName;
+     	 //vector<string> paramPair = split($4->getSymbolName(), ",");
+     	 vector<string> typeAndName;
 	 type_final=$1->getDataType();
-     name_final=$2->getName();
+	 name_final=$2->getName();
 	 currentFunc=functionName;
      
 
@@ -233,7 +233,7 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 				{
 					error_count++;
 
-						fprintf(error_output, "Line# %d: Multiple definition of function %s\n", line_count, functionName.c_str());
+					fprintf(error_output, "Line# %d: Multiple definition of function %s\n", line_count, functionName.c_str());
 				}
 			else{
 					vector<pair<string,string>> declaredList=currentFunction->getParameterList();
@@ -246,51 +246,51 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 						fprintf(error_output, "Line# %d: Conflicting types for %s\n", line_count, functionName.c_str());
 					}
 					else{
-                        vector<pair<string, string>> declaredParameter=currentFunction->getParameterList();
-                        //table.enterScope();
-                        bool inconsistentReturnTypeError = false;
-                        for(int i=0; i<parameterList.size(); i++)
-					{
-
-					    if(parameterList[i].second!=declaredParameter[i].second)
+                        			vector<pair<string, string>> declaredParameter=currentFunction->getParameterList();
+                        			//table.enterScope();
+                        			bool inconsistentReturnTypeError = false;
+                        			for(int i=0; i<parameterList.size(); i++)
 						{
-						    error_count++;
-						    //string error_msg = "Inconsistent type of argument" + declaredParameter[i].first + " in parameter";
-						    fprintf(error_output, "Line# %d: Inconsistent type of argument %s in parameter\n", line_count, (declaredParameter[i].first).c_str());
-						    inconsistentReturnTypeError = true;
-						    break;
+
+					    		if(parameterList[i].second!=declaredParameter[i].second)
+							{
+							    error_count++;
+							    //string error_msg = "Inconsistent type of argument" + declaredParameter[i].first + " in parameter";
+							    fprintf(error_output, "Line# %d: Inconsistent type of argument %s in parameter\n", line_count, (declaredParameter[i].first).c_str());
+							    inconsistentReturnTypeError = true;
+							    break;
+							}
+
 						}
 
-					}
-
-					bool multipleParamError = false;
-					for(int i=0; i<parameterList.size(); i++)
-					{
-					for(int j=0; j<parameterList.size(); j++)
-					{
-					    if(i==j)continue;
-					    else
-					    {
-						if(parameterList[i].first==parameterList[j].first)
+						bool multipleParamError = false;
+						for(int i=0; i<parameterList.size(); i++)
 						{
-						    error_count++;
-						    //string error_msg = "Multiple declaration of " + parameterList[i] + " in parameter";
-
-							fprintf(error_output, "Line# %d: Redefinition of parameter \'%s\'\n", line_count, (parameterList[i].first).c_str());
-						    multipleParamError = true;
-						    break;
+						for(int j=0; j<parameterList.size(); j++)
+						{
+						    if(i==j)continue;
+						    else
+						    {
+							if(parameterList[i].first==parameterList[j].first)
+							{
+							    error_count++;
+							    //string error_msg = "Multiple declaration of " + parameterList[i] + " in parameter";
+	
+								fprintf(error_output, "Line# %d: Redefinition of parameter \'%s\'\n", line_count, (parameterList[i].first).c_str());
+							    multipleParamError = true;
+							    break;
+							}
+						    }
 						}
-					    }
-					}
-                            		if(multipleParamError)
-                                		break;
-                        	}
-                        		if(!inconsistentReturnTypeError || !multipleParamError){                            
-                            		currentFunction->setIsFuncDefined(true);
-									currentFunction->setDataType(functionType);
+	                            		if(multipleParamError)
+	                                		break;
+	                        		}
+	                        		if(!inconsistentReturnTypeError || !multipleParamError){                            
+	                            		currentFunction->setIsFuncDefined(true);
+						currentFunction->setDataType(functionType);
                          
-                        	}
-                   	 }
+                        		}
+                   	 	}
 
 
 			}
@@ -300,16 +300,16 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 
 			error_count++;
 			//string msg = "Identifier '" + currentFunction->getName() + "' is not a function.";
-            fprintf(error_output, "Line# %d: \'%s\' redeclared as different kind of symbol\n", line_count, currentFunction->getName().c_str());
+            		fprintf(error_output, "Line# %d: \'%s\' redeclared as different kind of symbol\n", line_count, currentFunction->getName().c_str());
 			
 		}
 	}
 	else{
 		SymbolInfo *syminfo = new SymbolInfo(functionName, functionType, parameterList);
-        syminfo->setIsFuncDefined(true);
+        	syminfo->setIsFuncDefined(true);
 		syminfo->setDataType(functionType);
-        table.insertSymbol(syminfo);
-       	// table.enterScope();
+	        table.insertSymbol(syminfo);
+	       	// table.enterScope();
 	
 		bool multipleParamError = false;
 		for(int i=0; i<parameterList.size(); i++)
@@ -332,7 +332,7 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 
 		}
 		if( !multipleParamError){
-        syminfo->setIsFuncDefined(true);
+        	syminfo->setIsFuncDefined(true);
 		syminfo->setDataType(functionType);          
         }
 
@@ -353,64 +353,64 @@ func_definition : type_specifier ID LPAREN parameter_list RPAREN {
 
 }
 | type_specifier ID LPAREN RPAREN {
-	   	string functionType = $1->getName();
-       	string functionName = $2->getName();  
-	   	if(functionName == "main") isMainDefined=true;  
-       	SymbolInfo* currentFunction = table.lookUpSymbol(functionName);
-	   	vector<pair<string,string>> parameterList;
-	   	vector<pair<string,string>> paramPair;
-       	vector<string> typeAndName;
-	   	type_final=$1->getDataType();
-       	name_final=$2->getName();
-	   	currentFunc=functionName;
+	   	    string functionType = $1->getName();
+       		    string functionName = $2->getName();  
+	   	    if(functionName == "main") isMainDefined=true;  
+       		    SymbolInfo* currentFunction = table.lookUpSymbol(functionName);
+	   	    vector<pair<string,string>> parameterList;
+	   	    vector<pair<string,string>> paramPair;
+       		    vector<string> typeAndName;
+	   	    type_final=$1->getDataType();
+       		    name_final=$2->getName();
+	   	    currentFunc=functionName;
 
-
-	    for (int i=0;i<params.size();i++)
-	    {
-		pair<string,string> p(params[i].getName(), params[i].getDataType());
-		parameterList.push_back(p);
-	    }
-		if(currentFunction!=nullptr){
-				if (currentFunction->isDefined()) // Declared and Defined
-					{
-						error_count++;
-
-						fprintf(error_output, "Line# %d: Multiple definition of function %s\n", line_count, functionName.c_str());
-						fprintf(log_output, "Line# %d: Multiple definition of function %s\n", line_count, functionName.c_str());
-					}
-				else{   vector<pair<string,string>>parameterList;
-						if(parameterList.size()!=currentFunction->getParameterListSize()){
+	
+		    for (int i=0;i<params.size();i++)
+		    {
+			pair<string,string> p(params[i].getName(), params[i].getDataType());
+			parameterList.push_back(p);
+		    }
+			if(currentFunction!=nullptr){
+					if (currentFunction->isDefined()) // Declared and Defined
+						{
 							error_count++;
-							fprintf(error_output, "Line# %d: Total number of arguments mismatch with declaration in function %s\n", line_count, functionName.c_str());
-							fprintf(log_output, "Line# %d: Total number of arguments mismatch with declaration in function %s\n", line_count, functionName.c_str());
+	
+							fprintf(error_output, "Line# %d: Multiple definition of function %s\n", line_count, functionName.c_str());
+							fprintf(log_output, "Line# %d: Multiple definition of function %s\n", line_count, functionName.c_str());
 						}
-						if(currentFunction->getType()!=functionType){
-							error_count++;
-							fprintf(error_output, "Line# %d: Conflicting types for %s\n", line_count, functionName.c_str());
-							fprintf(log_output, "Line# %d: Conflicting types for %s\n", line_count, functionName.c_str());
+					else{   vector<pair<string,string>>parameterList;
+							if(parameterList.size()!=currentFunction->getParameterListSize()){
+								error_count++;
+								fprintf(error_output, "Line# %d: Total number of arguments mismatch with declaration in function %s\n", line_count, functionName.c_str());
+								fprintf(log_output, "Line# %d: Total number of arguments mismatch with declaration in function %s\n", line_count, functionName.c_str());
+							}
+							if(currentFunction->getType()!=functionType){
+								error_count++;
+								fprintf(error_output, "Line# %d: Conflicting types for %s\n", line_count, functionName.c_str());
+								fprintf(log_output, "Line# %d: Conflicting types for %s\n", line_count, functionName.c_str());
+							}
+							if(!(parameterList.size()!=currentFunction->getParameterListSize()) && !(currentFunction->getType()!=functionType)){
+								table.removeSymbol(functionName);
+								SymbolInfo *syminfo = new SymbolInfo(functionName, functionType, parameterList);      	
+								syminfo->setIsFuncDefined(true);
+								table.insertSymbol(syminfo);
+	
+							}
+	
+							}
+	
 						}
-						if(!(parameterList.size()!=currentFunction->getParameterListSize()) && !(currentFunction->getType()!=functionType)){
-							table.removeSymbol(functionName);
-							SymbolInfo *syminfo = new SymbolInfo(functionName, functionType, parameterList);      	
-							syminfo->setIsFuncDefined(true);
-							table.insertSymbol(syminfo);
-
-						}
-
-						}
-
-					}
-		else{
-
-		SymbolInfo *syminfo = new SymbolInfo(functionName, functionType, parameterList);
-		syminfo->setIsFuncDefined(true);
-		table.insertSymbol(syminfo);			
-	}
-	fprintf(asmout, "\n%s PROC\n", functionName.c_str());
-	if(functionName=="main") {
-		fprintf(asmout, "\tMOV AX, @DATA\n\tMOV DS, AX\n");
-	}
-	fprintf(asmout, "PUSH BP\nMOV BP, SP\n");
+			else{
+	
+			SymbolInfo *syminfo = new SymbolInfo(functionName, functionType, parameterList);
+			syminfo->setIsFuncDefined(true);
+			table.insertSymbol(syminfo);			
+		}
+		fprintf(asmout, "\n%s PROC\n", functionName.c_str());
+		if(functionName=="main") {
+			fprintf(asmout, "\tMOV AX, @DATA\n\tMOV DS, AX\n");
+		}
+		fprintf(asmout, "PUSH BP\nMOV BP, SP\n");
 
 
 	}compound_statement{
@@ -440,7 +440,7 @@ parameter_list  : parameter_list COMMA type_specifier ID{
 			$$ = new SymbolInfo($1->getName() + "," + $3->getName() + " " + $4->getName(), "parameter_list"); 
 			SymbolInfo s($4->getName(),$3->getDataType());   
 			s.setDataType($3->getDataType());         
-            params.push_back(s);
+            		params.push_back(s);
 			fprintf(log_output, "parameter_list : parameter_list COMMA type_specifier ID\n");
 		}
 		| parameter_list COMMA type_specifier{
@@ -448,7 +448,7 @@ parameter_list  : parameter_list COMMA type_specifier ID{
 			$$ = new SymbolInfo($1->getName() + "," + $3->getName() , "parameter_list"); 
 			SymbolInfo s("",$3->getDataType()) ; 
 			s.setDataType($3->getDataType());    
-            params.push_back(s);
+            		params.push_back(s);
 			fprintf(log_output, "parameter_list : parameter_list COMMA type_specifier\n");
 		}
  		| type_specifier ID{
@@ -456,7 +456,7 @@ parameter_list  : parameter_list COMMA type_specifier ID{
 			$$ = new SymbolInfo($1->getName() + " " + $2->getName(), "parameter_list");    
 			SymbolInfo s($2->getName(),$1->getDataType()); 
 			s.setDataType($1->getDataType());
-            params.push_back(s);
+            		params.push_back(s);
 			fprintf(log_output, "parameter_list : type_specifier ID\n");
 		}
 		| type_specifier{
@@ -464,7 +464,7 @@ parameter_list  : parameter_list COMMA type_specifier ID{
 			$$ = new SymbolInfo($1->getName(), "parameter_list");
 			SymbolInfo s("",$1->getDataType());
 			s.setDataType($1->getDataType());
-            params.push_back(s);
+           		params.push_back(s);
 			fprintf(log_output, "parameter_list : type_specifier\n");
 		}
  		;
@@ -476,13 +476,13 @@ compound_statement : LCURL{
 					parameterCount= params.size();
 
 				}
-                for(int i=0; i<params.size(); i++) {
+                		for(int i=0; i<params.size(); i++) {
 					SymbolInfo* s=new SymbolInfo(params[i].getName(),params[i].getDataType());
 					s->setStackOffset((params.size()-i-1)*2+4); // 2 for BP, 2 for ret address
 					s->setGlobal(false);
 					s->setDataType(params[i].getDataType());
 					table.insertSymbol(s);
-                }
+                		}
 				params.clear();
                 
 				} statements RCURL{
@@ -494,19 +494,19 @@ compound_statement : LCURL{
 				fprintf(log_output, "%s",allScope);
 				
 				table.exitScope();
-}
+			}
  		    | LCURL{
 				table.enterScope();	
 				if(params.size()>0){
 					parameterCount= params.size();
 
 				}	
-                for(int i=0; i<params.size(); i++) {
-				SymbolInfo* s=new SymbolInfo(params[i].getName(),params[i].getDataType());
-				s->setStackOffset((params.size()-i-1)*2+4); // 2 for BP, 2 for ret address
-				s->setGlobal(false);
-				table.insertSymbol(s);	
-            	}
+		                for(int i=0; i<params.size(); i++) {
+						SymbolInfo* s=new SymbolInfo(params[i].getName(),params[i].getDataType());
+						s->setStackOffset((params.size()-i-1)*2+4); // 2 for BP, 2 for ret address
+						s->setGlobal(false);
+						table.insertSymbol(s);	
+		            	}
 				params.clear();
 					
 				} RCURL{
@@ -519,8 +519,8 @@ compound_statement : LCURL{
  		    
 var_declaration : type_specifier declaration_list SEMICOLON{
 
-            $$ = new SymbolInfo("", "var_declaration");
-            fprintf(log_output, "var_declaration: type_specifier declaration_list SEMICOLON\n");
+            		$$ = new SymbolInfo("", "var_declaration");
+            		fprintf(log_output, "var_declaration: type_specifier declaration_list SEMICOLON\n");
 			string varType = $1->getDataType();
 			string varFirst = vars[0].getName();
 			if ($1->getDataType()=="void"){
@@ -607,21 +607,21 @@ var_declaration : type_specifier declaration_list SEMICOLON{
  		 
 type_specifier	: INT{
 
-					$$ = new SymbolInfo( "int","type_specifier");
-					string s="int";
+		    $$ = new SymbolInfo( "int","type_specifier");
+		    string s="int";
                     $$->setDataType("int");
                     type="int";
-				    fprintf(log_output, "type_specifier : INT \n");
+		    fprintf(log_output, "type_specifier : INT \n");
 		}
  		| FLOAT{
-					$$ = new SymbolInfo( "float","type_specifier");
-                   	$$->setDataType("float");
-                  	type="float";
-                   	fprintf(log_output, "type_specifier : FLOAT \n");
+		    $$ = new SymbolInfo( "float","type_specifier");
+                    $$->setDataType("float");
+                    type="float";
+                    fprintf(log_output, "type_specifier : FLOAT \n");
 		}
  		| VOID{
-					$$ = new SymbolInfo( "void","type_specifier");
-                   	$$->setDataType("void");
+		    $$ = new SymbolInfo( "void","type_specifier");
+                    $$->setDataType("void");
                     type="void";
                     fprintf(log_output, "type_specifier : VOID \n");
 		}
@@ -632,29 +632,29 @@ declaration_list : declaration_list COMMA ID{
 
 					$$ = new SymbolInfo( $3->getName(), "declaration_list");
 					SymbolInfo s( $3->getName(), "declaration_list");
-                    vars.push_back(s);
+                    			vars.push_back(s);
 					fprintf(log_output, "declaration_list : declaration_list COMMA ID\n");
 			}
  		  | declaration_list COMMA ID LTHIRD CONST_INT RTHIRD{
 					$$ = new SymbolInfo( $3->getName() ,"declaration_list");
-                    int size=stoi($5->getName());
+                    			int size=stoi($5->getName());
 					SymbolInfo s( $3->getName(), "declaration_list", size );
-                    vars.push_back(s);
+                   			vars.push_back(s);
 					fprintf(log_output, "declaration_list : declaration_list COMMA ID LTHIRD CONST_INT RTHIRD\n",  line_count);
 					}
  		  | ID{
 					$$ = new SymbolInfo($1->getName(), "declaration_list");
 					SymbolInfo s( $1->getName(), "declaration_list");
-                    vars.push_back(s);
-                    name = $1->getName();
+		                        vars.push_back(s);
+		                        name = $1->getName();
 					fprintf(log_output, "declaration_list : ID\n");
-					}
- 		  | ID LTHIRD CONST_INT RTHIRD{
+			}
+ 		  | 			ID LTHIRD CONST_INT RTHIRD{
 					$$ = new SymbolInfo($1->getName(),	"declaration_list");
-                    int size=stoi($3->getName());
+                    			int size=stoi($3->getName());
 					SymbolInfo s( $1->getName(), "declaration_list", size );
-                    vars.push_back(s);
-                    name = $1->getName();			
+		                        vars.push_back(s);
+		                        name = $1->getName();			
 					fprintf(log_output, "declaration_list : COMMA ID LTHIRD CONST_INT RTHIRD\n");
 		  }
  		  ;
@@ -662,12 +662,12 @@ declaration_list : declaration_list COMMA ID{
 statements : statement{
 					$$ = new SymbolInfo((string)$1->getName(), "statements");
 					fprintf(log_output, "statements : statement\n");
-			}
+		      }
 	   | statements statement{
 					$$ = new SymbolInfo($1->getName() + " " + $2->getName(), "statements");
 					fprintf(log_output, "statements : statements statement\n");	
-	   }
-	   ;
+	                         }
+	                          ;
 	   
 statement : var_declaration{
 		$$=new SymbolInfo((string)$1->getName(), "statement");
@@ -716,7 +716,8 @@ statement : var_declaration{
 	  } statement
 	  {
 		$$ = new SymbolInfo($1->getName()+$2->getName()+"else\n"+$5->getName(), "statement");
-		fprintf(log_output, "statement : IF LPAREN expression RPAREN statement ELSE statement\n");		fprintf(asmout, "%s: ; end if label\n", ("label_endif_"+to_string(ifCountStack.top())).c_str());
+		fprintf(log_output, "statement : IF LPAREN expression RPAREN statement ELSE statement\n");		
+                fprintf(asmout, "%s: ; end if label\n", ("label_endif_"+to_string(ifCountStack.top())).c_str());
 		ifCountStack.pop();
 	  }
 
@@ -746,8 +747,8 @@ statement : var_declaration{
 			$$ = new SymbolInfo("return "+$2->getName()+";", "statement");
 			fprintf(log_output, "statement : RETURN expression SEMICOLON\n");
 			if($2->getDataType() == "void") {
-					fprintf(error_output, "Line# %d: Void cannot be used in expression\n", line_count);
-                error_count++;
+			fprintf(error_output, "Line# %d: Void cannot be used in expression\n", line_count);
+                        error_count++;
                 
             } 
 			else if($2->getDataType()!=type_final){
@@ -1011,7 +1012,7 @@ rel_expression	: simple_expression {
 				
 simple_expression : term {
 
-		    $$ = new SymbolInfo($1->getName(), "simple_expression");
+		        $$ = new SymbolInfo($1->getName(), "simple_expression");
 			$$->setDataType($1->getDataType());
 			$$->setArraySize($1->getArraySize());
 			fprintf(log_output, "Line# %d: simple_expression : term\n", line_count);
@@ -1174,74 +1175,74 @@ factor	: variable {
 }
 	| ID LPAREN argument_list RPAREN{
 		
-            $$ = new SymbolInfo((string)$1->getName()+(string)"("+(string)$3->getName()+(string)")", "factor");
-			SymbolInfo* temp = table.lookUpSymbol($1->getName());
+	                $$ = new SymbolInfo((string)$1->getName()+(string)"("+(string)$3->getName()+(string)")", "factor");
+		        SymbolInfo* temp = table.lookUpSymbol($1->getName());
 			
 
-            if(temp == nullptr) {
-                error_count++;
+                        if(temp == nullptr) {
+                                error_count++;
 				fprintf(error_output, "Line# %d: Undeclared function \'%s\' \n", line_count, $1->getName().c_str());
-                //$$->setDataType("float");  
+                                //$$->setDataType("float");  
 
-            }
+                        }
 			else{
 				if(temp->isDefined()){
 					vector<pair<string,string>> declaredParameter=temp->getParameterList();
 					
 					if(temp->getParameterListSize()==1 && argumentList.size()==0 && declaredParameter[0].second=="void") {
-                    $$->setDataType(temp->getDataType());
+                                                $$->setDataType(temp->getDataType());
 
-                	}
+                	                }
 					if(temp->getParameterListSize() > argumentList.size()) {
-                    
-                    error_count++;
-					fprintf(error_output, "Line# %d: Too few arguments to function \'%s\'\n", line_count, temp->getName().c_str());
-                   // $$->setDataType("float"); 
+	                    
+	                                        error_count++;
+						fprintf(error_output, "Line# %d: Too few arguments to function \'%s\'\n", line_count, temp->getName().c_str());
+	                                        // $$->setDataType("float"); 
 
-               		 }
+               		                }
 					else if(temp->getParameterListSize() < argumentList.size()) {
                     
-                    error_count++;
+                    				error_count++;
 
-					fprintf(error_output, "Line# %d: Too many arguments to function \'%s\'\n", line_count, temp->getName().c_str());
-                    //$$->setDataType("float"); 
+					        fprintf(error_output, "Line# %d: Too many arguments to function \'%s\'\n", line_count, temp->getName().c_str());
+                                                //$$->setDataType("float"); 
 
-                	}
+                	                }
 				 	else {
                    
 						bool err=false;
 					
-                    	for(int i=0; i<argumentList.size(); i++) {
-                        if(declaredParameter[i].second != argumentList[i].getDataType()) {
-                            err=true;
-							fprintf(error_output, "Line# %d: Type mismatch for argument %d of \'%s\'\n", line_count, i+1,temp->getName().c_str());
-                        	
-                        }
-						if(argumentList[i].isArray()) {
-                            err=true;
-							fprintf(error_output, "Line# %d: Type mismatch for argument %d of \'%s\'\n", line_count, i+1,temp->getName().c_str());
-                        	
-                        }
+			                    	for(int i=0; i<argumentList.size(); i++) {
+			                        	if(declaredParameter[i].second != argumentList[i].getDataType()) {
+				                            err=true;
+							    fprintf(error_output, "Line# %d: Type mismatch for argument %d of \'%s\'\n", line_count, i+1,temp->getName().c_str());
+			                        	
+			                        	}
+							if(argumentList[i].isArray()) {
+	                            				err=true;
+								fprintf(error_output, "Line# %d: Type mismatch for argument %d of \'%s\'\n", line_count, i+1,temp->getName().c_str());
+	                        	
+	                        			}
 						
-                    }
+                    				}
 
-                    if(err) {
-						error_count++;
-                       // $$->setDataType("float");  
-
-                    } else {
-                        $$->setDataType(temp->getDataType());
+			                    if(err) {
+					       error_count++;
+			                       // $$->setDataType("float");  
+			
+			                    } else {
+			                        $$->setDataType(temp->getDataType());
 						fprintf(asmout, "CALL %s\n", $1->getName().c_str());
 						if(temp->getDataType()!="void"){
-							fprintf(asmout, "PUSH AX ; return value of %s\n", $1->getName().c_str());
+						fprintf(asmout, "PUSH AX ; return value of %s\n", $1->getName().c_str());
 						}
-                    }
-                } 
+			                    }
+			                } 
 				}
 				else{
-				error_count++;
-				fprintf(error_output, "Line# %d: Inconsistent function call\n", line_count);
-                //$$->setDataType("float");  
+					error_count++;
+					fprintf(error_output, "Line# %d: Inconsistent function call\n", line_count);
+	                		//$$->setDataType("float");  
 				}
 			}
 			fprintf(log_output, "Line# %d: factor : ID LPAREN argument_list RPAREN\n");
