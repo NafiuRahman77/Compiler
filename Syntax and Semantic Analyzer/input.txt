@@ -47,7 +47,6 @@ int main(){
 	
 	a = correct_foo(a,c);
 	b = correct_foo(a);
-	dd = correct_foo(a, b, a);
 	
 	k = 5+2;
 	b[5] = 7;

@@ -11,15 +11,14 @@ Line# 45: Type mismatch for argument 1 of 'func'
 Line# 45: Type mismatch for argument 2 of 'func'
 Line# 48: Type mismatch for argument 2 of 'correct_foo'
 Line# 49: Too few arguments to function 'correct_foo'
-Line# 50: Too many arguments to function 'correct_foo'
-Line# 52: Undeclared variable 'k'
-Line# 53: 'b' is not an array
-Line# 54: Array subscript is not an integer
-Line# 55: Void cannot be used in expression
-Line# 58: Void cannot be used in expression
-Line# 59: Warning: possible loss of data in assignment of FLOAT to INT
-Line# 60: Division by Zero
-Line# 61: Operands of modulus must be integers
-Line# 63: Undeclared function 'foo5' 
-Line# 68: Undeclared variable 'h'
-Line# 68: Undeclared function 'printf' 
+Line# 51: Undeclared variable 'k'
+Line# 52: 'b' is not an array
+Line# 53: Array subscript is not an integer
+Line# 54: Void cannot be used in expression
+Line# 57: Void cannot be used in expression
+Line# 58: Warning: possible loss of data in assignment of FLOAT to INT
+Line# 59: Division by Zero
+Line# 60: Operands of modulus must be integers
+Line# 62: Undeclared function 'foo5' 
+Line# 67: Undeclared variable 'h'
+Line# 67: Undeclared function 'printf' 

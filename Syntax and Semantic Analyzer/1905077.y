@@ -866,6 +866,7 @@ variable : ID {
 	 | ID LTHIRD expression RTHIRD {
 		SymbolInfo *temp = table.lookUpSymbol($1->getName());
 		$$ = new SymbolInfo($1->getName()+"["+$3->getName()+"]","variable");
+		
 		if(temp==nullptr){
 			error_count++;
 			fprintf(error_output, "Line# %d: Undeclared variable %s\n", line_count, $1->getName().c_str());
@@ -875,11 +876,11 @@ variable : ID {
 		else{
 			if(temp->isArray()){
 				if($3->getDataType() != "int") {
-				fprintf(error_output, "Line# %d: Array subscript is not an integer\n", line_count, $1->getName().c_str());
-				fprintf(log_output, "Line# %d: Array subscript is not an integer", line_count, $1->getName().c_str());
-                error_count++;
+					fprintf(error_output, "Line# %d: Array subscript is not an integer\n", line_count, $1->getName().c_str());
+					fprintf(log_output, "Line# %d: Array subscript is not an integer", line_count, $1->getName().c_str());
+                	error_count++;
 
-           		 }
+           		}
 				 else{
 					$$ = new SymbolInfo($1->getName()+"["+$3->getName()+"]", "variable");
 					$$->setDataType(temp->getDataType());
@@ -889,8 +890,9 @@ variable : ID {
 			}
 			else{
 					error_count++;
+					//cout<<"boppoo";
 					fprintf(error_output, "Line# %d: \'%s\' is not an array\n", line_count, $1->getName().c_str());
-					fprintf(log_output, "Line# %d: \'%s\' is not an array\'%s\'\n", line_count, $1->getName().c_str());
+					fprintf(log_output, "Line# %d: \'%s\' is not an array \n", line_count, $1->getName().c_str());
 					
 			}
 
