@@ -46,8 +46,8 @@ void ParseTree(SymbolInfo* s,int t, ostream &os)
 
 // Offline 4 code
 FILE *asmout;
-ifstream asmly;
-ofstream optimizely;
+ifstream asm2;
+ofstream optimized;
 // int lineNumber=0;
 vector<string> lineVector(1000);
 int tempCount=0;
@@ -1336,6 +1336,16 @@ arguments : arguments COMMA logic_expression{
  
 
 %%
+
+vector<string> split(string str){
+	vector<string> result;
+	stringstream ss(str);
+	string token;
+	while(getline(ss, token, ' ')){
+		result.push_back(token);
+	}
+	return result;
+}
 int main(int argc,char *argv[])
 {
 
@@ -1354,8 +1364,7 @@ int main(int argc,char *argv[])
 
 	yyin=fp;
 	yyparse();
-	
-	
+
 	fclose(log_output);
 	fclose(error_output);
 	parse_tree.close();

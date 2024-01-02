@@ -82,7 +82,7 @@ compound_statement : LCURL statements RCURL
 	ScopeTable# 1
 	2--> <main,int> 
 
-À÷V’Ufunc_definition :type_specifier ID LPAREN RPAREN compound_statement 
+À-þB-Vfunc_definition :type_specifier ID LPAREN RPAREN compound_statement 
 unit : func_definition
 program : unit
 start : program
