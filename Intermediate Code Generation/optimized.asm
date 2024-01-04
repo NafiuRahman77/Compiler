@@ -1,0 +1,2 @@
+MOV AX, A
+MOV A, AX

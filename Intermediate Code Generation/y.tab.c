@@ -3195,15 +3195,52 @@ yyreturnlab:
 #line 1338 "1905077.y"
 
 
-vector<string> split(string str){
-	vector<string> result;
-	stringstream ss(str);
-	string token;
-	while(getline(ss, token, ' ')){
-		result.push_back(token);
-	}
-	return result;
+// Function to remove redundant MOV instructions
+void removeRedundantMOV(vector<string>& lines) {
+    for (auto it = lines.begin(); it != lines.end(); ++it) {
+        auto nextIt = it + 1;
+        if (nextIt != lines.end() && (*it).substr(0, 3) == "MOV" && (*nextIt).substr(0, 3) == "MOV") {
+            // Check if the operands are the same
+            string op1 = (*it).substr(4);
+            string op2 = (*nextIt).substr(4);
+            if (op1 == op2) {
+                // Remove the redundant MOV instruction
+                it = lines.erase(it);
+            }
+        }
+    }
 }
+
+// Function to remove redundant PUSH and POP instructions
+void removeRedundantPUSHPOP(vector<string>& lines) {
+    for (auto it = lines.begin(); it != lines.end(); ++it) {
+        auto nextIt = it + 1;
+        if (nextIt != lines.end() && (*it).substr(0, 4) == "PUSH" && (*nextIt).substr(0, 3) == "POP") {
+            // Check if the operands are the same. you should take two characters like ax bx cx dx
+			string op1 = (*it).substr(5, 2);
+			string op2 = (*nextIt).substr(4, 2);
+			
+            if (op1 == op2) {
+                // Remove the redundant PUSH and POP instructions
+                it = lines.erase(it, nextIt + 1);
+            }
+            
+        }
+    }
+}
+
+// Function to remove redundant operations
+void removeRedundantOperations(vector<string>& lines) {
+    for (auto it = lines.begin(); it != lines.end(); ++it) {
+        if ((*it).find("ADD AX, 0") != string::npos || (*it).find("MUL AX, 1") != string::npos || (*it).find("SUB AX, 0") != string::npos || (*it).find("ADD BX, 0") != string::npos || (*it).find("MUL BX, 1") != string::npos || (*it).find("SUB BX, 0") != string::npos
+					|| (*it).find("ADD CX, 0") != string::npos || (*it).find("MUL CX, 1") != string::npos || (*it).find("SUB CX, 0") != string::npos || (*it).find("ADD DX, 0") != string::npos || (*it).find("MUL DX, 1") != string::npos || (*it).find("SUB DX, 0") != string::npos) {
+            // Remove redundant ADD AX, 0 and MUL AX, 1 instructions
+            it = lines.erase(it);
+        }
+    }
+}
+
+
 int main(int argc,char *argv[])
 {
 
@@ -3213,20 +3250,41 @@ int main(int argc,char *argv[])
 		exit(1);
 	}
 
-	log_output= fopen("log_output.txt","w");
-	error_output= fopen("error_output.txt","w");
-	parse_tree.open("parse_tree.txt",ios::out);
-	asmout= fopen("code.asm","w");
-	fclose(asmout);
-	asmout= fopen("code.asm","a");
+	// log_output= fopen("log_output.txt","w");
+	// error_output= fopen("error_output.txt","w");
+	// parse_tree.open("parse_tree.txt",ios::out);
+	// asmout= fopen("code.asm","w");
+	// fclose(asmout);
+	// asmout= fopen("code.asm","a");
 
-	yyin=fp;
-	yyparse();
+	// yyin=fp;
+	// yyparse();
 
-	fclose(log_output);
-	fclose(error_output);
-	parse_tree.close();
-	fclose(asmout);
+	// fclose(log_output);
+	// fclose(error_output);
+	// parse_tree.close();
+	// fclose(asmout);
+
+	asm2.open("code.asm",ios::in);
+	vector<string> lines;
+	string line;
+
+	while(getline(asm2, line)) {
+		lines.push_back(line);
+	}
+
+	asm2.close();
+
+	removeRedundantMOV(lines);
+	removeRedundantPUSHPOP(lines);
+	removeRedundantOperations(lines);
+
+	optimized.open("optimized.asm",ios::out);
+	cout<<lines.size()<<endl;
+	for (const string& optimizedLine : lines) {
+        optimized << optimizedLine << endl;
+    }
+	optimized.close();
 
 	return 0;
 }
