@@ -64,16 +64,23 @@ The repository is organized as follows:
 
 ## Example Input
 ```c
-int factorial(int n) {
-    if (n == 0) {
-        return 1;
-    }
-    return n * factorial(n - 1);
+int foo(int a){
+	if(a == 0){
+		return 1;
+	}
+	return foo(a-1) * a;
 }
-
-void main() {
-    int x = 5;
-    int result = factorial(x);
+ 
+ 
+int main(){
+	int i,j,k;
+	i = 7;
+	j = 3;
+ 
+	k = foo(i) ;
+	println(k);
+ 
+	return 0;
 }
 ```
 
@@ -83,6 +90,11 @@ void main() {
 - **Parse Tree Representation**: `parse_tree.txt`
 - **Generated Assembly**: `code.asm`
 - **Optimized Assembly**: `optimized.asm`
+
+## Assembly Output Demonstration
+
+<img src="demo/demo.png" alt="Demonstration" width="500">
+
 
 ---
 
