@@ -99,6 +99,6 @@ int main(){
 ---
 
 ## References
-- [Flex Documentation](https://westes.github.io/flex/manual.html)
+- [Flex Documentation](https://github.com/westes/flex)
 - [Bison Documentation](https://www.gnu.org/software/bison/)
 
