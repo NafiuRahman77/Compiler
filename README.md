@@ -93,7 +93,7 @@ int main(){
 
 ## Assembly Output Demonstration
 
-<img src="demo/demo.png" alt="Demonstration" width="500">
+<img src="demo.png" alt="Demonstration" width="500">
 
 
 ---
