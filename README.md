@@ -1,4 +1,4 @@
-# Subset of C Compiler
+# A mini C Compiler
 
 ## Overview
 This project is a subset of a C compiler developed using **Flex** (Lexical Analyzer) and **Bison** (Parser Generator). The compiler supports essential C functionalities such as loops, branching (`if-else`), functions, integer arrays, and recursion. The compiler parses the subset of C code and translates it into either executable machine code or an intermediate representation.
