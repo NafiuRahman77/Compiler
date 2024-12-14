@@ -50,8 +50,8 @@ The repository is organized as follows:
 ## How to Run
 1. Clone the repository:
    ```bash
-   git clone <repository_url>
-   cd <repository_directory>
+   git clone https://github.com/NafiuRahman77/Compiler.git
+   cd Compiler
    ```
 
 2. Run scripts in each folder as specified:
